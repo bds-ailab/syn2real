@@ -1,0 +1,19 @@
+name: 📦 Release
+run-name: 📦 Release ${{ github.ref_name }}
+
+on:
+  release:
+    types:
+      - released
+
+jobs:
+  release:
+    name: 📦 Release the image
+    uses: GLB-BDS-AILAB-CV/tools-shared_workflows/.github/workflows/release-docker.yml@v0.4
+    with:
+      registry: ${{ vars.SF2_REGISTRY_URL }}
+      snapshot_folder: ${{ vars.SF2_DOCKER_SNAPSHOT }}
+      release_folder: ${{ vars.SF2_DOCKER_RELEASE }}
+    secrets:
+      REGISTRY_USERNAME: ${{ secrets.GLB_BDS_SF2_JFROG_USERNAME }}
+      REGISTRY_PWD: ${{ secrets.GLB_BDS_SF2_JFROG_PWD }}

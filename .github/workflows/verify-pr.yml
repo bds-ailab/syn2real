@@ -1,0 +1,10 @@
+name: 🧪 Verify pull request
+run-name: "🧪 Gab is verifying PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+
+on:
+  - pull_request
+
+jobs:
+  changes:
+    name: 💅 Lint the PR
+    uses: GLB-BDS-AILAB-CV/tools-shared_workflows/.github/workflows/lint-pr.yml@v0.5.2

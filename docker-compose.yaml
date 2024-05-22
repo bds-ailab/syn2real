@@ -1,0 +1,28 @@
+services:
+  template-container:
+    image: ${IMAGE_NAME}:${IMAGE_TAG}
+    build:
+      context: .
+      args:
+        http_proxy: ${HTTP_PROXY}
+        https_proxy: ${HTTPS_PROXY}
+        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
+        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        GROUP_NAME: ${GROUP_NAME}
+        GROUP_ID: ${GROUP_ID}
+        REGISTRY: ${RELEASE_REGISTRY}
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      https_proxy: ${HTTPS_PROXY}
+      GROUP_ID: ${GROUP_ID}
+      GROUP_NAME: ${GROUP_NAME}
+      USER_ID: ${USER_ID}
+      USER_NAME: ${USER_NAME}
+
+    # Uncomment below to add your user and mount sandbox home dir when you run the container
+
+    # user: root:0
+    # entrypoint: ['/entrypoint.sh']
+
+    # volumes:
+    #   - /sandbox/home/${USER_NAME}:/home/${USER_NAME}
