@@ -52,6 +52,8 @@ jobs:
           SERVICE_ACC_NAME: ${{ secrets.SERVICE_ACC_NAME }}
 
           # 🚨 IF YOU NEED MORE ENVIRONMENT VARIABLES AT BUILD, PLEASE ADD THEM HERE
+          DATA_PATH: /tmp/public/dataset
+          SRC_PATH: /tmp/src
 
           # Tag depends on the trigger that called this workflow [ manual | merge | release ]
           #   manual  ->  <image-name>:<ref-hash>

@@ -1,5 +1,5 @@
 services:
-  template-container:
+  llm_aug_container:
     image: ${IMAGE_NAME}:${IMAGE_TAG}
     build:
       context: .
@@ -11,6 +11,9 @@ services:
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
+    working_dir: /home/${USER_NAME}/src
+    stdin_open: true
+    tty: true
     environment:
       http_proxy: ${HTTP_PROXY}
       https_proxy: ${HTTPS_PROXY}
@@ -24,5 +27,8 @@ services:
     # user: root:0
     # entrypoint: ['/entrypoint.sh']
 
-    # volumes:
-    #   - /sandbox/home/${USER_NAME}:/home/${USER_NAME}
+    volumes:
+      - ${DATA_PATH}:/data
+      - ${SRC_PATH}:/src
+
+

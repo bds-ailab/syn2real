@@ -1,157 +1,49 @@
-# Template Container with pipelines
+<h1>LLMs for data semantic augmentation</h1>
 
-## 💬 Description
-This repo provides a generic container template with the pipeline to push images to the SF2 (snapshot and release).
+<h3>Project Goal</h1>
+Using synthetically generated images for deep learning purposes has great advantages of perfect knowledge about the scenes parameters such as objects positions, depth, labels ... However, Training DL models directly on such datasets induces a biais which affects the model's performances on real world images (Domain shift problem). This project aims to enhance the realism of synthetic images and semantically augment the existing objects in a given scene using diffusion models.
 
+<h3>Methodology</h1>
 
-## 🪲 Possibles Issues
+After close research in the <a href="https://confluencebdsfr.fsc.atos-services.net/display/BREBD/Syn2Real+State+of+the+art" target="_blank">state of the art</a>, ControlNet was found to be very suitable for our use case and its requirements. ControlNet combines good conditioning capacities with great generalization potential on top of light training costs. However, ControlNet alone is still not sufficient to generate hyper-realistic images.For this reason, it will be trained averserially with a discriminator that detects fake images from real images. The discriminator will push the generator (ControlNet) to produce images with high plausibility to be real (see strategy in figure below).   
 
+![alt text](img/strategy.png)
 
-## 🚨 IMPORTANT
-**This repo should be use as a `template repository` when creating a new repo. It should NOT be cloned after the creation of a new repo.**  
-To access the datasets in the container, don't forget to modify the volume in the compose.yaml file.  
-Don't mount the full disk, only what you need.  
-Mount your different datasets as different volumes.
+<h3>Installation [Using Docker]</h1>
 
+1. Clone the repository and its submodules:
 
-## 🚀 How to Use
-### Create a new GitHub repo
-1. Follow [Repo naming convention link](https://confluencebdsfr.fsc.atos-services.net/x/BgCKFg)
-2. Go to the [GitHub page of the BDS AILAB CV organization](https://github.gsissc.myatos.net/GLB-BDS-AILAB-CV). Scroll down to the *Repositories* section and click on `New`.
-3. Under the *Repository template* section, select the `GLB-BDS-AILAB-CV/template-container` template ([More informations here](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)). Alternatively, you can directly click on the green button "Use this template" that is on the top right corner of **this** github repository and select "Create a new repository"
-4. Enter the *Repository name*
-5. Create repository
+    ```
+    git clone https://github.gsissc.myatos.net/GLB-BDS-AILAB-CV/synset-poc-llm_data_augmentation.git
+    cd synset-poc-llm_data_augmentation
+    ```
 
+2. Configure your environment variables in the `.env` file:
 
-### 🌳 Create a new branch
-**👉 Follow [branch naming convention documentation](https://confluencebdsfr.fsc.atos-services.net/x/DwCKFg)**
+    ```python
+    # Replace the fields with your personal informations
+    HTTP_PROXY=
+    HTTPS_PROXY=
+    USER_NAME=
+    USER_ID=
+    GROUP_NAME=
+    GROUP_ID=
+    ```
 
-### ⏱️ Trigger mechanism
-To trigger the pipeline that will build and publish your image, you can use these mechanisms:  
-#### Manual
-Tag is the associated commit hash, [manual trigger link](https://docs.github.com/en/actions/using-workflows/manually-running-a-workflow).
+3. Configure the volume mapping for your dataset in the `docker-compose.yaml` file:
 
-![alt text](img/image-2.png)
+    ```yaml
+    ...
 
-If you click on the button as in the image above, the pipeline will build and push the image:
-`yolov8_aas:<latest commit hash of branch selected>`
+    volumes:
+        - /YOUR/PATH/TO/THE/DATASET/IN/HOST:/home/${USER_NAME}/data
+        - //YOUR/PATH/TO/THE/SRC_CODE/IN/HOST:/home/${USER_NAME}/src
+    ...
+    ```
+    Ensure that the left part of the volume mapping corresponds to the dataset's path on your host machine.
 
-#### PR merged into main
-Tag is main, [pull request link](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/merging-a-pull-request)
+4. Launch Docker:
 
-![alt text](img/image-3.png)
-
-Scroll down to the bottom of the `PR` then select the merge option available as in the above image selected `Squash and merge` , the pipeline will build and push the image:
-`yolov8_aas:main`
-
-### Pre-release
-Tag is pre-release tag.
-
-![alt text](img/image-4.png)
-
-If you select the check box `Set as a pre-release` then click on the button `Publish release` as in the above image, the pipeline will build and push the image:
-`yolov8_aas:v0.2.0` 
-
-#### Release
-Tag is release tag, [release link](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release)
-
-![alt text](img/image-5.png)
-
-Uncheck `Set as a pre-release`, then click on the button `Update release`, the pipeline will build and push the image:
-`yolov8_aas:v0.2.0 release`
-
-
-### 🚫 Add `.env` to `.gitignore`
-You must add the `.env` file to your `.gitignore` to not store secrets in github.  
-You can edit `.env` with the environment variables for your local usage.
-
-### ⚙️ Set environment variables for pipelines
-#### 📁 Repository settings
-You can edit the variables that are not set at organization level in the repository settings ([more information here](https://docs.github.com/en/actions/learn-github-actions/variables)).  
-If you are using secrets with repository scope, document in a Confluence page how to get them.
-
-#### 🔨 build-docker.yml
-Once you have set the variables and secrets, you can reference them in the pipeline in `.github/workflows/build-docker.yml`.
-
-```yaml
-env:
-  # Variables needed in docker compose
-  GROUP_ID: ${{ secrets.GROUP_ID }}
-```
-
-
-In this example, `GROUP_ID: ${{ secrets.GROUP_ID }}` set the `GROUP_ID` environment variable with the `GROUP_ID` secret value set at organization level ([more information here](https://docs.github.com/en/actions/learn-github-actions/variables)).
-
-#### 🐙 `docker-compose.yml`
-The `docker compose build` command is now called with the right environment variables, and you have to pass them to the Dockerfile at build time ([more information here](https://docs.docker.com/compose/compose-file/compose-file-v3/#build))
-
-**🚨 The `$REGISTRY` arg is mandatory to use the artifactory at build time**
-
-**Example:**
-```yaml
-build:
-  args:
-    GROUP_ID: ${GROUP_ID}
-``` 
-   
-#### 🐳 `Dockerfile`
-Eventually, you can use these variables in your Dockerfile ([more information here](https://docs.docker.com/reference/dockerfile/#arg)).
-
-*At build time:*
-```Dockerfile
-ARG GROUP_ID
-```
-*At run time:*
-```Dockerfile
-ENV GROUP_ID="${GROUP_ID}"
-```
-   
-### 🎨 Customize your image
-You can now use customize the image for your specific use case.
-
-### ▶️ Modify `entrypoint`
-You can either use a `.sh` or a `.py` file. 
-
-### 🐳 Edit `Dockerfile`
-👉 Follow [Dockerfile configuration link](https://docs.docker.com/engine/reference/builder/)
-
-### 🐙 Edit `docker-compose.yml`
-👉 Follow [docker-compose configuration link](https://docs.docker.com/get-started/08_using_compose/)
-
-### ✒️ Update README file
-You can edit the readme in the `docs` folder or override it by putting one at the root of the repository.
-
-### ✅ How to validate
-#### 🔀 Run build action on your branch
-To validate the pipeline:
-- click on the `Actions`.
-- select `Build and store`.
-- from `Run workflow` dropdown list select the `branch` that you want to run the pipeline on.
-- click on `Run workflow`.
-
-#### 👀 Get your PR reviewed
-If the pipeline built successfully:
-- create a Pull Request for the branch you built ([more information here]'https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)).
-- follow the PR template.
-- select a reviewer.
-- add the link to the successful GitHub Action in the **🧪 How to test:** section of the description.
-- set your PR from `Draft` to `Ready for review`.
-
-#### 🆚 Compare to Example
-You can compare your repository to those examples:
-- [innov-container-yolov8_ass](https://github.gsissc.myatos.net/GLB-BDS-AILAB-CV/innov-container-yolov8_aas)
-- [models-container-yolov5_cvlab](https://github.gsissc.myatos.net/GLB-BDS-AILAB-CV/models-container-yolov5_cvlab)
-
-### 🧪 How to test your build
-#### ⚙️ Configuration of the artifactory locally
-Login to the `registry.sf.bds.atos.net` ([more information here](https://sf.bds.atos.net/cookbook/howtos/global-acces-RT.html)).
-
-
-#### 📥 Pull the image
-**🗼Once the pipeline successfully built**
-
-Go to `Build and store` then click on the the pipeline that you built as above image.
-
-![alt text](img/image-6.png)
-
-In this picture, to use it I ran: `docker pull registry.sf.bds.atos.net/brebd-docker-snapshot/yolov5_cvlab:44ca260414cab067b4880f0ea7cf2ef467877518`
+    ```
+    docker compose up
+    ```
