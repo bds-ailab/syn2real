@@ -3,6 +3,7 @@ services:
     image: ${IMAGE_NAME}:${IMAGE_TAG}
     build:
       context: .
+      shm_size: '2gb'
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
@@ -11,6 +12,7 @@ services:
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
+    shm_size: '2gb'
     working_dir: /home/${USER_NAME}/src
     stdin_open: true
     tty: true

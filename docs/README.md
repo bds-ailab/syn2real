@@ -37,7 +37,7 @@ After close research in the <a href="https://confluencebdsfr.fsc.atos-services.n
 
     volumes:
         - /YOUR/PATH/TO/THE/DATASET/IN/HOST:/home/${USER_NAME}/data
-        - //YOUR/PATH/TO/THE/SRC_CODE/IN/HOST:/home/${USER_NAME}/src
+        - /YOUR/PATH/TO/THE/SRC_CODE/IN/HOST:/home/${USER_NAME}/src
     ...
     ```
     Ensure that the left part of the volume mapping corresponds to the dataset's path on your host machine.
@@ -47,3 +47,5 @@ After close research in the <a href="https://confluencebdsfr.fsc.atos-services.n
     ```
     docker compose up
     ```
+
+<!-- TODO : Update Readme -->
