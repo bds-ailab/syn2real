@@ -37,7 +37,9 @@ COPY --chown="${SERVICE_ACC_NAME}":"${GROUP_NAME}" ./ControlNet /ControlNet
 
 # Cloning ControlNet repository
 RUN curl -L https://github.com/lllyasviel/ControlNet/archive/refs/heads/main.zip -o /ControlNet/controlnet.zip \
-    && unzip -q /ControlNet/controlnet.zip -d /ControlNet/
+    && unzip -q /ControlNet/controlnet.zip -d /ControlNet/ \
+    && mv /ControlNet/ControlNet-main /ControlNet/ControlNet \
+    && rm /ControlNet/controlnet.zip
     
 # Install python packages
 COPY --chown="${SERVICE_ACC_NAME}":"${GROUP_NAME}" ./requirements_controlnet.txt /requirements_controlnet.txt

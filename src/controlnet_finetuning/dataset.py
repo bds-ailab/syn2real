@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 from torch.utils.data import Dataset
-from config import DATA_PATH
+from train_config import DATA_PATH
 
 
 class MyDataset(Dataset):

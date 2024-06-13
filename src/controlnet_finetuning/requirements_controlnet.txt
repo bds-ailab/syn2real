@@ -28,3 +28,4 @@ pytest-testdox ~= 3.1.0
 pytest-cov ~= 5.0.0
 pytest-sugar ~= 1.0.0
 pytest-clarity ~= 1.0.1
+pillow ~= 10.3.0

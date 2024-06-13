@@ -1,11 +1,21 @@
-from ControlNet.share import *
+import sys
+import os
+from dataset import MyDataset
+from train_config import RESUME_PATH, MODEL_PATH
 
+# Adding the src directory to the sys.path to ensure imports work correctly
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../ControlNet/ControlNet")
+    ),
+)
+
+from share import *
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
-from dataset import MyDataset
-from ControlNet.cldm.logger import ImageLogger
-from ControlNet.cldm.model import create_model, load_state_dict
-from config import RESUME_PATH, MODEL_PATH
+from cldm.logger import ImageLogger
+from cldm.model import create_model, load_state_dict
 
 
 def train():
@@ -53,7 +63,7 @@ def train():
         accelerator="gpu",
         precision=16,
         callbacks=[logger],
-        strategy="ddp_find_unused_parameters_true",
+        strategy="ddp",
         accumulate_grad_batches=2,
     )
 
