@@ -54,11 +54,17 @@ jobs:
           # 🚨 IF YOU NEED MORE ENVIRONMENT VARIABLES AT BUILD, PLEASE ADD THEM HERE
           DATA_PATH: /tmp/public/dataset
           SRC_PATH: /tmp/src
+          MODEL_PATH: /tmp/models
+          OUT_PATH: /tmp/output
 
           # Tag depends on the trigger that called this workflow [ manual | merge | release ]
           #   manual  ->  <image-name>:<ref-hash>
           #   merge   ->  <image-name>:<ref-name>
           #   release ->  <image-name>:<tag>
+          IMAGE_NAME_CONTROLNET: ${{ steps.get-image-name.outputs.snapshot-name }}_controlnet
+          IMAGE_TAG_CONTROLNET: ${{ env.IMAGE_TAG }}
+          IMAGE_NAME_BASELINE: ${{ steps.get-image-name.outputs.snapshot-name }}_baseline
+          IMAGE_TAG_BASELINE: ${{ env.IMAGE_TAG }}
           IMAGE_NAME: ${{ steps.get-image-name.outputs.snapshot-name }}
 
           # Use legacy builder
@@ -67,8 +73,11 @@ jobs:
         # With no-cache because of pip dependencies
         run: docker compose build
 
-      - name: 📦 Store the image
-        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}:${{ env.IMAGE_TAG }}
+      - name: 📦 Store the baseline model image
+        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}_baseline:${{ env.IMAGE_TAG }}
+
+      - name: 📦 Store the controlnet finetunin image
+        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}_controlnet:${{ env.IMAGE_TAG }}
 
       - name: 📜 Summary
         run: |

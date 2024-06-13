@@ -7,7 +7,7 @@ TRAIN_PATH = "/data/syn2real/train/"
 VAL_PATH = "/data/syn2real/validation/"
 
 # Path to save trained model weights
-MODEL_PATH = "/src/resnet50_latest.pth"
+MODEL_PATH = "/models/resnet50_latest.pth"
 
 # Split rate to split train dataset to train and test
 SR = 0.15
@@ -21,7 +21,7 @@ NUM_WORKERS = 2
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # File to save the loss/epoch logs
-LOG_FILE = "log.txt"
+LOG_FILE = "/output/log.txt"
 
 # Number of training epochs
 NUM_EPOCHS = 1
@@ -33,6 +33,6 @@ OPTIMIZER = optim.Adam
 CRITEREON = nn.CrossEntropyLoss()
 
 # Path to save confusion matrix image
-CONF_PATH = "/src/confusion_matrix.png"
+CONF_PATH = "/output/confusion_matrix.png"
 # Path to save classification report
-REPORT_PATH = "/src/classification_report.txt"
+REPORT_PATH = "/output/classification_report.txt"

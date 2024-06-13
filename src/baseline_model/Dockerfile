@@ -8,6 +8,7 @@ ARG SERVICE_ACC_NAME
 ARG SERVICE_ACC_UID
 ARG GROUP_NAME
 ARG GROUP_ID
+ARG SRC_PATH
 
 # ENV DEBIAN_FRONTEND=noninteractive
 
@@ -31,10 +32,10 @@ RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" \
 USER "${SERVICE_ACC_NAME}":"${GROUP_NAME}"
 
 # Install python packages
-COPY --chown="${SERVICE_ACC_NAME}":"${GROUP_NAME}" ./requirements.txt /requirements.txt
+COPY --chown="${SERVICE_ACC_NAME}":"${GROUP_NAME}" ./requirements_baseline.txt /requirements_baseline.txt
 RUN pip install --user --upgrade pip\
-    pip install --user --default-timeout=100 --no-cache-dir -r /requirements.txt
+    pip install --user --default-timeout=100 --no-cache-dir -r /requirements_baseline.txt
 
-COPY --chown="${SERVICE_ACC_NAME}":"${GROUP_NAME}" entrypoint.sh /entrypoint.sh
+# COPY --chown="${SERVICE_ACC_NAME}":"${GROUP_NAME}" entrypoint.sh /entrypoint.sh
 
 # Write your docker commands here

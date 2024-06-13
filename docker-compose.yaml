@@ -1,8 +1,8 @@
 services:
-  llm_aug_container:
-    image: ${IMAGE_NAME}:${IMAGE_TAG}
+  baseline_model:
+    image: ${IMAGE_NAME_BASELINE}:${IMAGE_TAG_BASELINE}
     build:
-      context: .
+      context: ./src/baseline_model
       shm_size: '2gb'
       args:
         http_proxy: ${HTTP_PROXY}
@@ -12,8 +12,8 @@ services:
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
+        SRC_PATH: ${SRC_PATH}
     shm_size: '2gb'
-    working_dir: /home/${USER_NAME}/src
     stdin_open: true
     tty: true
     environment:
@@ -30,7 +30,53 @@ services:
     # entrypoint: ['/entrypoint.sh']
 
     volumes:
+      # Datasets volume
       - ${DATA_PATH}:/data
-      - ${SRC_PATH}:/src
+      # Source code volume
+      - ${SRC_PATH}/baseline_model:/baseline_model
+      # Models volume
+      - ${MODEL_PATH}:/models
+      # Output volume
+      - ${OUT_PATH}:/output
+
+  controlnet_finetuning:
+    image: ${IMAGE_NAME_CONTROLNET}:${IMAGE_TAG_CONTROLNET}
+    build:
+      context: ./src/controlnet_finetuning
+      shm_size: '10gb'
+      args:
+        http_proxy: ${HTTP_PROXY}
+        https_proxy: ${HTTPS_PROXY}
+        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
+        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        GROUP_NAME: ${GROUP_NAME}
+        GROUP_ID: ${GROUP_ID}
+        REGISTRY: ${RELEASE_REGISTRY}
+        SRC_PATH: ${SRC_PATH}
+    shm_size: '10gb'
+    stdin_open: true
+    tty: true
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      https_proxy: ${HTTPS_PROXY}
+      GROUP_ID: ${GROUP_ID}
+      GROUP_NAME: ${GROUP_NAME}
+      USER_ID: ${USER_ID}
+      USER_NAME: ${USER_NAME}
+
+    # Uncomment below to add your user and mount sandbox home dir when you run the container
+
+    # user: root:0
+    # entrypoint: ['/entrypoint.sh']
+
+    volumes:
+      # Datasets volume
+      - ${DATA_PATH}:/data
+      # Source code volume
+      - ${SRC_PATH}/controlnet_finetuning:/controlnet_finetuning
+      # Models volume
+      - ${MODEL_PATH}:/models
+      # Output volume
+      - ${OUT_PATH}:/output
 
 
