@@ -65,6 +65,8 @@ jobs:
           IMAGE_TAG_CONTROLNET: ${{ env.IMAGE_TAG }}
           IMAGE_NAME_BASELINE: ${{ steps.get-image-name.outputs.snapshot-name }}_baseline
           IMAGE_TAG_BASELINE: ${{ env.IMAGE_TAG }}
+          IMAGE_NAME_BLIP: ${{ steps.get-image-name.outputs.snapshot-name }}_blip
+          IMAGE_TAG_BLIP: ${{ env.IMAGE_TAG }}
           IMAGE_NAME: ${{ steps.get-image-name.outputs.snapshot-name }}
 
           # Use legacy builder
@@ -76,8 +78,11 @@ jobs:
       - name: 📦 Store the baseline model image
         run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}_baseline:${{ env.IMAGE_TAG }}
 
-      - name: 📦 Store the controlnet finetunin image
+      - name: 📦 Store the controlnet finetuning image
         run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}_controlnet:${{ env.IMAGE_TAG }}
+
+      - name: 📦 Store the blip image
+        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}_blip:${{ env.IMAGE_TAG }}
 
       - name: 📜 Summary
         run: |

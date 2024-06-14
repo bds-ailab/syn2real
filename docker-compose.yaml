@@ -78,5 +78,47 @@ services:
       - ${MODEL_PATH}:/models
       # Output volume
       - ${OUT_PATH}:/output
+  
+  blip_caption:
+    image: ${IMAGE_NAME_BLIP}:${IMAGE_TAG_BLIP}
+    build:
+      context: ./src/blip_caption
+      shm_size: '2gb'
+      args:
+        http_proxy: ${HTTP_PROXY}
+        https_proxy: ${HTTPS_PROXY}
+        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
+        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        GROUP_NAME: ${GROUP_NAME}
+        GROUP_ID: ${GROUP_ID}
+        REGISTRY: ${RELEASE_REGISTRY}
+        SRC_PATH: ${SRC_PATH}
+    shm_size: '2gb'
+    stdin_open: true
+    tty: true
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      https_proxy: ${HTTPS_PROXY}
+      GROUP_ID: ${GROUP_ID}
+      GROUP_NAME: ${GROUP_NAME}
+      USER_ID: ${USER_ID}
+      USER_NAME: ${USER_NAME}
+
+    # Uncomment below to add your user and mount sandbox home dir when you run the container
+
+    # user: root:0
+    # entrypoint: ['/entrypoint.sh']
+
+    volumes:
+      # Datasets volume
+      - ${DATA_PATH}:/data
+      # Source code volume
+      - ${SRC_PATH}/blip_caption:/blip_caption
+      # Models volume
+      - ${MODEL_PATH}:/models
+      # Output volume
+      - ${OUT_PATH}:/output
+
+  
 
 
