@@ -1,7 +1,8 @@
 import sys
 import os
-from dataset import MyDataset
-from train_config import RESUME_PATH, MODEL_PATH
+from dataset import MyDataset, CityDataset
+from train_config import RESUME_PATH, MODEL_PATH, DATA_PATH, VAL_DATA_PATH
+import torch
 
 # Adding the src directory to the sys.path to ensure imports work correctly
 sys.path.insert(
@@ -10,6 +11,7 @@ sys.path.insert(
         os.path.join(os.path.dirname(__file__), "../ControlNet/ControlNet")
     ),
 )
+
 
 from share import *
 import pytorch_lightning as pl
@@ -24,13 +26,15 @@ def train():
     # Configs
     resume_path = RESUME_PATH
     # Training batch size
-    batch_size = 10
+    batch_size = 2
     # Logger frequency to save images
-    logger_freq = 300
+    logger_freq = 200
+
     # Training learning rate
-    learning_rate = 4e-5
-    # Freezing Stable diffusion weights
-    sd_locked = True
+    learning_rate = 2e-5
+    # Unfreezing SD decoder layers : brave action with risk of overfitting
+    # The multiple data augmentation techniques prevent this risk
+    sd_locked = False
     # Injecting control in every block of the decoder and not just mid block
     only_mid_control = False
 
@@ -42,7 +46,10 @@ def train():
     model.only_mid_control = only_mid_control
 
     # Loading dataset and applying necessary transforms
-    dataset = MyDataset()
+    # The images are resized to low resolution for faster training
+    dataset = CityDataset(
+        data_path=DATA_PATH, shape=(512, 256), canny=True, noise=False
+    )
 
     # Defining the dataloader
     dataloader = DataLoader(
@@ -58,13 +65,13 @@ def train():
 
     # Defining pytorch trainer with multiple gpus strategy
     # Note: accumulate grad will accumulate the gradient of multiple batches before updating
+    # This parameter simulates large batch sizes which leads to more stable learning
     trainer = pl.Trainer(
         devices=2,
         accelerator="gpu",
-        precision=16,
+        precision=32,
         callbacks=[logger],
-        strategy="ddp",
-        accumulate_grad_batches=2,
+        accumulate_grad_batches=15,
     )
 
     # Train!
@@ -72,4 +79,6 @@ def train():
 
 
 if __name__ == "__main__":
+    # Empty cuda cache to prevent 'some' CUDA out of memory errors
+    torch.cuda.empty_cache()
     train()

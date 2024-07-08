@@ -37,7 +37,7 @@ services:
       # Models volume
       - ${MODEL_PATH}:/models
       # Output volume
-      - ${OUT_PATH}:/output
+      - ${OUT_PATH}:/out
 
   controlnet_finetuning:
     image: ${IMAGE_NAME_CONTROLNET}:${IMAGE_TAG_CONTROLNET}
@@ -77,7 +77,7 @@ services:
       # Models volume
       - ${MODEL_PATH}:/models
       # Output volume
-      - ${OUT_PATH}:/output
+      - ${OUT_PATH}:/out
   
   blip_caption:
     image: ${IMAGE_NAME_BLIP}:${IMAGE_TAG_BLIP}
@@ -117,7 +117,7 @@ services:
       # Models volume
       - ${MODEL_PATH}:/models
       # Output volume
-      - ${OUT_PATH}:/output
+      - ${OUT_PATH}:/out
 
   
 

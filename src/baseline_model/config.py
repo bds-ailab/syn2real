@@ -21,7 +21,7 @@ NUM_WORKERS = 2
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # File to save the loss/epoch logs
-LOG_FILE = "/output/log.txt"
+LOG_FILE = "/out/log.txt"
 
 # Number of training epochs
 NUM_EPOCHS = 1
@@ -33,6 +33,6 @@ OPTIMIZER = optim.Adam
 CRITEREON = nn.CrossEntropyLoss()
 
 # Path to save confusion matrix image
-CONF_PATH = "/output/confusion_matrix.png"
+CONF_PATH = "/out/confusion_matrix.png"
 # Path to save classification report
-REPORT_PATH = "/output/classification_report.txt"
+REPORT_PATH = "/out/classification_report.txt"

@@ -1,13 +1,14 @@
 import torch
 
+
 # Computing device
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Dataset absolute path
-DATA_PATH = "/data/mock_data/fill50k/target/"
+DATA_PATH = "/data/cityscape/data.json"
 
 # Output saving file for captions/paths
-FILE_NAME = "/data/mock_data/fill50k/generated_captions.txt"
+FILE_NAME = "/data/cityscape/data_captionned.json"
 
-# Special token to add at the beginning of the captions
-TOKEN = "a picture of "
+# Prompt: Question to ask BLIP about the picture
+PROMPT = "a picture of "

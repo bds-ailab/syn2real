@@ -3,7 +3,8 @@ import requests
 from transformers import BlipProcessor, BlipForConditionalGeneration
 import os
 import torch
-from config import DEVICE, DATA_PATH, FILE_NAME, TOKEN
+from config import DEVICE, DATA_PATH, FILE_NAME, PROMPT
+import json
 
 
 def load_model(device=DEVICE):
@@ -34,15 +35,14 @@ def load_data(data_path=DATA_PATH):
     Returns:
         paths (list): list of images absolute paths
     """
-    # Extracting the images names from path
-    names = os.listdir(data_path)
+    with open(data_path, "r") as openfile:
+        # Reading from json file
+        paths = json.load(openfile)
 
-    # Absolute paths
-    paths = [DATA_PATH + name for name in names]
     return paths
 
 
-def process(processor, model, paths):
+def process(processor, model, paths, prompt=PROMPT):
     """Process images and generate captions
 
     Args:
@@ -60,10 +60,12 @@ def process(processor, model, paths):
     while i < len(paths):
 
         # Loading images batch by batch for memory efficiency
-        images = [Image.open(path).convert("RGB") for path in paths[i : i + 20]]
+        images = [
+            Image.open(path["target"]).convert("RGB") for path in paths[i : i + 20]
+        ]
 
         # Starting the text prompt with 'a picture of '
-        text = ["a picture of "] * len(images)
+        text = [prompt] * len(images)
 
         # Preprocessing the images and texts for BLIP
         # Note: batch is attached to GPU and using float16 for acceleration
@@ -88,7 +90,7 @@ def process(processor, model, paths):
     return captions
 
 
-def save_captions(paths, captions, filename=FILE_NAME, special_token=TOKEN):
+def save_captions(paths, captions, filename=FILE_NAME, prompt=PROMPT):
     """save captions with images paths in a txt file
 
     Args:
@@ -98,9 +100,11 @@ def save_captions(paths, captions, filename=FILE_NAME, special_token=TOKEN):
         special_token (str, optional): a special token to add at the start of the caption for all images. Defaults to TOKEN.
     """
     assert len(paths) == len(captions)
-    lines = [
-        paths[i] + ";" + special_token + captions[i][13:] for i in range(len(paths))
-    ]
-    f = open(filename, "a")
-    f.writelines(lines)
-    f.close()
+    for i in range(len(paths)):
+        if paths[i]["dataset"] == "real":
+            paths[i]["caption"] = "a real picture of " + captions[i][len(prompt) :]
+        else:
+            paths[i]["caption"] = "a synthetic picture of " + captions[i][len(prompt) :]
+
+    with open(filename, "w") as f:
+        json.dump(paths, f)

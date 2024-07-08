@@ -24,6 +24,9 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy src code
+COPY ./* /baseline_model/
+
 # hadolint ignore=DL3046
 RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" \
     && echo "%${GROUP_NAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
