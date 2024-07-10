@@ -3,7 +3,7 @@ services:
     image: ${IMAGE_NAME_BASELINE}:${IMAGE_TAG_BASELINE}
     build:
       context: ./src/baseline_model
-      shm_size: '2gb'
+      shm_size: ${LOW_SHM:-2gb}
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
@@ -12,8 +12,8 @@ services:
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH}
-    shm_size: '2gb'
+        SRC_PATH: ${SRC_PATH:?error}
+    shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
     environment:
@@ -23,27 +23,17 @@ services:
       GROUP_NAME: ${GROUP_NAME}
       USER_ID: ${USER_ID}
       USER_NAME: ${USER_NAME}
-
-    # Uncomment below to add your user and mount sandbox home dir when you run the container
-
-    # user: root:0
-    # entrypoint: ['/entrypoint.sh']
-
     volumes:
-      # Datasets volume
-      - ${DATA_PATH}:/data
-      # Source code volume
-      - ${SRC_PATH}/baseline_model:/baseline_model
-      # Models volume
-      - ${MODEL_PATH}:/models
-      # Output volume
-      - ${OUT_PATH}:/out
+      - data:/data
+      - src_path_baseline:/baseline_model
+      - models:/models
+      - output:/out
 
   controlnet_finetuning:
     image: ${IMAGE_NAME_CONTROLNET}:${IMAGE_TAG_CONTROLNET}
     build:
       context: ./src/controlnet_finetuning
-      shm_size: '10gb'
+      shm_size: ${HIGH_SHM:-10gb}
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
@@ -52,8 +42,8 @@ services:
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH}
-    shm_size: '10gb'
+        SRC_PATH: ${SRC_PATH:?error}
+    shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
     tty: true
     environment:
@@ -63,27 +53,17 @@ services:
       GROUP_NAME: ${GROUP_NAME}
       USER_ID: ${USER_ID}
       USER_NAME: ${USER_NAME}
-
-    # Uncomment below to add your user and mount sandbox home dir when you run the container
-
-    # user: root:0
-    # entrypoint: ['/entrypoint.sh']
-
     volumes:
-      # Datasets volume
-      - ${DATA_PATH}:/data
-      # Source code volume
-      - ${SRC_PATH}/controlnet_finetuning:/controlnet_finetuning
-      # Models volume
-      - ${MODEL_PATH}:/models
-      # Output volume
-      - ${OUT_PATH}:/out
-  
+      - data:/data
+      - src_path_controlnet:/controlnet_finetuning
+      - models:/models
+      - output:/out
+
   blip_caption:
     image: ${IMAGE_NAME_BLIP}:${IMAGE_TAG_BLIP}
     build:
       context: ./src/blip_caption
-      shm_size: '2gb'
+      shm_size: ${LOW_SHM:-2gb}
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
@@ -92,8 +72,8 @@ services:
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH}
-    shm_size: '2gb'
+        SRC_PATH: ${SRC_PATH:?error}
+    shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
     environment:
@@ -103,22 +83,40 @@ services:
       GROUP_NAME: ${GROUP_NAME}
       USER_ID: ${USER_ID}
       USER_NAME: ${USER_NAME}
-
-    # Uncomment below to add your user and mount sandbox home dir when you run the container
-
-    # user: root:0
-    # entrypoint: ['/entrypoint.sh']
-
     volumes:
-      # Datasets volume
-      - ${DATA_PATH}:/data
-      # Source code volume
-      - ${SRC_PATH}/blip_caption:/blip_caption
-      # Models volume
-      - ${MODEL_PATH}:/models
-      # Output volume
-      - ${OUT_PATH}:/out
+      - data:/data
+      - src_path_blip:/blip_caption
+      - models:/models
+      - output:/out
 
-  
-
-
+volumes:
+  data:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-/dev/null}
+  src_path_baseline:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:?error}/baseline_model
+  src_path_controlnet:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:?error}/controlnet_finetuning
+  src_path_blip:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:?error}/blip_caption
+  models:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MODEL_PATH:-/dev/null}
+  output:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${OUT_PATH:-/dev/null}

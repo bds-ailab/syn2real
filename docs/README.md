@@ -5,7 +5,7 @@ Using synthetically generated images for deep learning purposes has great advant
 
 <h3>Methodology</h1>
 
-After close research in the <a href="https://confluencebdsfr.fsc.atos-services.net/display/BREBD/Syn2Real+State+of+the+art" target="_blank">state of the art</a>, ControlNet was found to be very suitable for our use case and its requirements. ControlNet combines good conditioning capacities with great generalization potential on top of light training costs. However, ControlNet alone is still not sufficient to generate hyper-realistic images.For this reason, it will be trained averserially with a discriminator that detects fake images from real images. The discriminator will push the generator (ControlNet) to produce images with high plausibility to be real (see strategy in figure below).   
+After close research in the <a href="https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Real+%3A%3A+State+of+the+art" target="_blank">state of the art</a>, ControlNet was found to be very suitable for our use case and its requirements. ControlNet combines good conditioning capacities with great generalization potential on top of light training costs. However, ControlNet alone is still not sufficient to generate hyper-realistic images.For this reason, it will be trained averserially with a discriminator that detects fake images from real images. The discriminator will push the generator (ControlNet) to produce images with high plausibility to be real (see strategy in figure below).   
 
 ![alt text](img/strategy.png)
 
