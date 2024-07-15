@@ -3,11 +3,10 @@ import cv2
 import numpy as np
 
 from torch.utils.data import Dataset
-from train_config import DATA_PATH
 
 
 class MyDataset(Dataset):
-    def __init__(self, data_path=DATA_PATH):
+    def __init__(self, data_path):
         """function: Dataset fetching class
 
         Args:
@@ -67,7 +66,7 @@ class MyDataset(Dataset):
 
 class CityDataset(Dataset):
     def __init__(
-        self, data_path=DATA_PATH, shape=(1024, 512), canny=False, noise=True, val=False
+        self, data_path, shape=(1024, 512), canny=False, noise=True, val=False
     ):
         """function: Dataset fetching class
 

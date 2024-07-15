@@ -88,6 +88,36 @@ services:
       - src_path_blip:/blip_caption
       - models:/models
       - output:/out
+      
+  mlflow:
+    image: ${IMAGE_NAME_MLFLOW}:${IMAGE_TAG_MLFLOW}
+    build:
+      context: ./mlflow
+      shm_size: ${LOW_SHM:-2gb}
+      args:
+        http_proxy: ${HTTP_PROXY}
+        https_proxy: ${HTTPS_PROXY}
+        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
+        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        GROUP_NAME: ${GROUP_NAME}
+        GROUP_ID: ${GROUP_ID}
+        REGISTRY: ${RELEASE_REGISTRY}
+        SRC_PATH: ${SRC_PATH:?error}
+    shm_size: ${LOW_SHM:-2gb}
+    stdin_open: true
+    tty: true
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      https_proxy: ${HTTPS_PROXY}
+      GROUP_ID: ${GROUP_ID}
+      GROUP_NAME: ${GROUP_NAME}
+      USER_ID: ${USER_ID}
+      USER_NAME: ${USER_NAME}
+    volumes:
+      - data:/data
+      - src_path_mlflow:/mlflow
+      - models:/models
+      - output:/out
 
 volumes:
   data:
@@ -110,6 +140,11 @@ volumes:
       type: none
       o: bind
       device: ${SRC_PATH:?error}/blip_caption
+  src_path_mlflow:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:?error}/../mlflow
   models:
     driver_opts:
       type: none

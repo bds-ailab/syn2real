@@ -1,0 +1,26 @@
+exp_config: 
+  exp_name: cvlab-llm_data_aug-controlnet_sdv21-finetuning
+  run_name: canny_seg_29ep
+
+model_config: 
+  resume_path: /models/controlnet_v21_canny_ep23.ckpt
+  model_path: /models/cldm_v21.yaml
+  sd_locked: False
+  only_mid_control: False
+
+data_config: 
+  data_path: /data/cityscape/data_captionned.json
+  img_w: 896
+  img_h: 448
+  canny: True 
+  noise: False 
+
+train_config: 
+  batch_size: 1
+  logger_freq: 200 
+  learning_rate: 2e-5
+  accumulate_grad_batches: 15
+  num_devices: 2
+  max_epochs: 6
+  precision: 32
+

@@ -66,6 +66,8 @@ jobs:
           IMAGE_TAG_BASELINE: ${{ env.IMAGE_TAG }}
           IMAGE_NAME_BLIP: ${{ steps.get-image-name.outputs.snapshot-name }}/blip
           IMAGE_TAG_BLIP: ${{ env.IMAGE_TAG }}
+          IMAGE_NAME_MLFLOW: ${{ steps.get-image-name.outputs.snapshot-name }}/mlflow
+          IMAGE_TAG_MLFLOW: ${{ env.IMAGE_TAG }}
           IMAGE_NAME: ${{ steps.get-image-name.outputs.snapshot-name }}
 
           # Use legacy builder
