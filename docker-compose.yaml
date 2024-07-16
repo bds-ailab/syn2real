@@ -119,6 +119,36 @@ services:
       - models:/models
       - output:/out
 
+  deepfloyd:
+    image: ${IMAGE_NAME_DEEPF}:${IMAGE_TAG_DEEPF}
+    build:
+      context: ./src/deepfloyd_scaler
+      shm_size: ${HIGH_SHM:-10gb}
+      args:
+        http_proxy: ${HTTP_PROXY}
+        https_proxy: ${HTTPS_PROXY}
+        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
+        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        GROUP_NAME: ${GROUP_NAME}
+        GROUP_ID: ${GROUP_ID}
+        REGISTRY: ${RELEASE_REGISTRY}
+        SRC_PATH: ${SRC_PATH:?error}
+    shm_size: ${HIGH_SHM:-10gb}
+    stdin_open: true
+    tty: true
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      https_proxy: ${HTTPS_PROXY}
+      GROUP_ID: ${GROUP_ID}
+      GROUP_NAME: ${GROUP_NAME}
+      USER_ID: ${USER_ID}
+      USER_NAME: ${USER_NAME}
+    volumes:
+      - data:/data
+      - src_path_deepf:/deepf
+      - models:/models
+      - output:/out
+
 volumes:
   data:
     driver_opts:
@@ -145,6 +175,11 @@ volumes:
       type: none
       o: bind
       device: ${SRC_PATH:?error}/../mlflow
+  src_path_deepf:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:?error}/deepfloyd_scaler
   models:
     driver_opts:
       type: none
