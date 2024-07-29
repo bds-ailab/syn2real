@@ -1,0 +1,2 @@
+bitsandbytes ~= 0.43.1
+opencv-contrib-python ~= 4.9.0
