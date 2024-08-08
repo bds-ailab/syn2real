@@ -201,6 +201,13 @@ def parse_args(input_args=None):
         " If not specified controlnet weights are initialized from unet.",
     )
     parser.add_argument(
+        "--unet_model_name_or_path",
+        type=str,
+        default=None,
+        help="Path to pretrained unet model or model identifier from huggingface.co/models."
+        " If not specified controlnet weights are initialized from base SDXL.",
+    )
+    parser.add_argument(
         "--variant",
         type=str,
         default=None,

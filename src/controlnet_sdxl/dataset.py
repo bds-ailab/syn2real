@@ -5,6 +5,7 @@ import torch.utils.checkpoint
 from datasets import load_dataset
 from PIL import Image
 from torchvision import transforms
+from scipy import signal
 
 
 def get_train_dataset(args, accelerator, logger):
@@ -126,6 +127,38 @@ def prepare_train_dataset(args, dataset, accelerator):
         ]
     )
 
+    def generate_wave(size):
+        """Generates random wave function to distort segmentation maps images
+
+        Args:
+            size (int): signal lenght
+
+        Returns:
+            numpy.ndarray: array of wave values
+        """
+        # Random frequencies
+        freq1 = 0.1 * np.random.rand()
+        freq2 = 0.01 * np.random.rand()
+        freq3 = 0.001 * np.random.rand()
+        # Random magnitudes
+        amp1 = np.random.rand()
+        amp2 = np.random.rand()
+
+        distortion = np.zeros(size)
+        for i in range(len(distortion)):
+            # Generate wave values
+            distortion[i] = (
+                np.random.rand() * amp1 * np.sin(freq1 * i) * np.cos(freq2 * i)
+                + amp2 * np.sin(freq3 * i)
+                + ((0.00001 * i) ** 5)
+            )
+
+        # Smooth the function
+        distortion = signal.medfilt(distortion, 3)
+        # Normalize the values beween 0-1
+        distortion /= distortion.max()
+        return distortion
+
     def augment_train(image, conditioning_image, syn_bool):
         """Add augmentation techniques on input image
 
@@ -137,6 +170,8 @@ def prepare_train_dataset(args, dataset, accelerator):
         Returns:
             pil image: Augmented conditioning image
         """
+        if conditioning_image.size[0] != image.size[0]:
+            conditioning_image = conditioning_image.resize(image.size)
         image_array = np.array(image)
         conditioning_image_array = np.array(conditioning_image)
 
@@ -195,14 +230,13 @@ def prepare_train_dataset(args, dataset, accelerator):
             else:
                 # Different thresholds for real in syn images because of the noise present in syn images
                 if not syn_bool:
-                    low_threshold = np.random.randint(20, 70)  # 50
-                    high_threshold = np.random.randint(180, 220)  # 120
+                    low_threshold = np.random.randint(0, 250)  # 50
 
                 # Thresholds were selected experimentaly by looking for values that generates the same output
                 # for both real and synthetic images
                 else:
-                    low_threshold = np.random.randint(140, 180)  # 150
-                    high_threshold = np.random.randint(185, 220)  # 200
+                    low_threshold = np.random.randint(100, 300)  # 150
+                high_threshold = low_threshold + np.random.randint(20, 100)  # 120
 
                 # Transforming the target image to canny edges
                 canny_image = cv2.Canny(image_array, low_threshold, high_threshold)
@@ -221,8 +255,50 @@ def prepare_train_dataset(args, dataset, accelerator):
                 # Combining segmentation map with canny edges
                 conditioning_image_array[canny_image == 1] = 255
 
-        # Returning conditioning image in pil format
-        conditioning_image = Image.fromarray(conditioning_image_array)
+        # Distort synthetic images
+        # I observed that the model (after multiple rounds of training) started to distinguish
+        # Segmentation maps of synthetic images only from their regularitym which makes it harder
+        # to transform synthetic images to real in the inference, so I'm adding the distortions to
+        # fool the model into thinking that synthetic images have distorted segmentation maps then
+        # remove the irregularities in the inference to be more like a real images's seg map
+        if syn_bool:
+            # Generate a function to distort the image along x,y axis
+            dist_y = generate_wave(conditioning_image_array.shape[0])
+            dist_x = generate_wave(conditioning_image_array.shape[1])
+
+            im_shifted = np.copy(conditioning_image_array)
+            for i in range(conditioning_image_array.shape[1]):
+                # Shift each column with 'shift' pixels, the value of the shift is given from the wave function
+                shift = int(6 * dist_x[i])
+                if shift > 0:
+                    # Pad the missing pixels of the column after shifting
+                    ndata = np.pad(im_shifted[:, i], ((shift, 0), (0, 0)), mode="edge")
+                    im_shifted[:, i] = ndata[: len(ndata) - shift, :]
+                elif shift < 0:
+                    # Pad the missing pixels of the column after shifting
+                    ndata = np.pad(im_shifted[:, i], ((0, -shift), (0, 0)), mode="edge")
+                    im_shifted[:, i] = ndata[-shift:, :]
+
+            for j in range(conditioning_image_array.shape[0]):
+                # Shift each row with 'shift' pixels, the value of the shift is given from the wave function
+                shift = int(6 * dist_y[j])
+                if shift > 0:
+                    # Pad the missing pixels of the row after shifting
+                    ndata = np.pad(im_shifted[j, :], ((shift, 0), (0, 0)), mode="edge")
+                    im_shifted[j, :] = ndata[: len(ndata) - shift, :]
+                elif shift < 0:
+                    # Pad the missing pixels of the row after shifting
+                    ndata = np.pad(im_shifted[j, :], ((0, -shift), (0, 0)), mode="edge")
+                    im_shifted[j, :] = ndata[-shift:, :]
+
+            # Add random gaussian noise on top
+            salt_noise = np.uint8(np.random.normal(0, 1, im_shifted.shape) < 0.4)
+            im_shifted *= salt_noise
+            conditioning_image = Image.fromarray(im_shifted)
+
+        else:
+            # Returning conditioning image in pil format
+            conditioning_image = Image.fromarray(conditioning_image_array)
         return conditioning_image
 
     def preprocess_train(examples):
@@ -288,6 +364,9 @@ def collate_fn(examples):
     add_time_ids = torch.stack(
         [torch.tensor(example["time_ids"]) for example in examples]
     )
+    syn_or_real = torch.stack(
+        [torch.tensor(example["syn_or_real"]) for example in examples]
+    )
 
     return {
         "pixel_values": pixel_values,
@@ -297,4 +376,5 @@ def collate_fn(examples):
             "text_embeds": add_text_embeds,
             "time_ids": add_time_ids,
         },
+        "syn_or_real": syn_or_real,
     }

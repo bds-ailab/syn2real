@@ -61,7 +61,7 @@ def process(processor, model, paths, prompt=PROMPT):
 
         # Loading images batch by batch for memory efficiency
         images = [
-            Image.open(path["target"]).convert("RGB") for path in paths[i : i + 20]
+            Image.open(path["image"]).convert("RGB") for path in paths[i : i + 20]
         ]
 
         # Starting the text prompt with 'a picture of '
@@ -101,10 +101,10 @@ def save_captions(paths, captions, filename=FILE_NAME, prompt=PROMPT):
     """
     assert len(paths) == len(captions)
     for i in range(len(paths)):
-        if paths[i]["dataset"] == "real":
-            paths[i]["caption"] = "a real picture of " + captions[i][len(prompt) :]
-        else:
-            paths[i]["caption"] = "a synthetic picture of " + captions[i][len(prompt) :]
+        # The paths[i]["dataset"] can be 'real', 'synthetic' or 'artifacted
+        paths[i]["text"] = (
+            f"a {paths[i]['dataset']} picture of " + captions[i][len(prompt) :]
+        )
 
     with open(filename, "w") as f:
         json.dump(paths, f)

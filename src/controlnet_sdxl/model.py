@@ -150,5 +150,5 @@ def encode_prompt(
 
     prompt_embeds = torch.concat(prompt_embeds_list, dim=-1)
     pooled_prompt_embeds = pooled_prompt_embeds.view(bs_embed, -1)
-    syn_or_real = ["synthetic" in caption for caption in prompt_batch]
+    syn_or_real = [not ("real" in caption) for caption in prompt_batch]
     return prompt_embeds, pooled_prompt_embeds, syn_or_real

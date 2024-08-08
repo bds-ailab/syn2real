@@ -159,7 +159,7 @@ def main(args):
         revision=args.revision,
         variant=args.variant,
     )
-    if args.unet_model_name_or_path and args.unet_model_name_or_path != "None":
+    if args.unet_model_name_or_path != "None":
         unet = UNet2DConditionModel.from_pretrained(
             args.unet_model_name_or_path,
             subfolder="unet",
@@ -174,10 +174,7 @@ def main(args):
             variant=args.variant,
         )
 
-    if (
-        args.controlnet_model_name_or_path
-        and args.controlnet_model_name_or_path != "None"
-    ):
+    if args.controlnet_model_name_or_path != "None":
         logger.info("Loading existing controlnet weights")
         controlnet = ControlNetModel.from_pretrained(args.controlnet_model_name_or_path)
     else:
@@ -222,12 +219,22 @@ def main(args):
         accelerator.register_save_state_pre_hook(save_model_hook)
         accelerator.register_load_state_pre_hook(load_model_hook)
 
-    # Freezing all parameters but controlnet parameters
+    # Freezing all parameters but attention layers parameters in unet decoder
     vae.requires_grad_(False)
-    unet.requires_grad_(False)
+    controlnet.requires_grad_(False)
     text_encoder_one.requires_grad_(False)
     text_encoder_two.requires_grad_(False)
-    controlnet.train()
+    unet.requires_grad_(False)
+    unet.conv_norm_out.requires_grad_(True)
+    unet.conv_norm_out.train()
+    unet.conv_out.requires_grad_(True)
+    unet.conv_out.train()
+    unet.up_blocks[2].requires_grad_(True)
+    unet.up_blocks[2].train()
+    unet.up_blocks[1].attentions.requires_grad_(True)
+    unet.up_blocks[1].attentions.train()
+    unet.up_blocks[0].attentions.requires_grad_(True)
+    unet.up_blocks[0].attentions.train()
 
     if args.enable_npu_flash_attention:
         if is_torch_npu_available():
@@ -258,17 +265,6 @@ def main(args):
         controlnet.enable_gradient_checkpointing()
         unet.enable_gradient_checkpointing()
 
-    # Check that all trainable models are in full precision
-    low_precision_error_string = (
-        " Please make sure to always have all model weights in full float32 precision when starting training - even if"
-        " doing mixed precision training, copy of the weights should still be float32."
-    )
-
-    if unwrap_model(controlnet).dtype != torch.float32:
-        raise ValueError(
-            f"Controlnet loaded as datatype {unwrap_model(controlnet).dtype}. {low_precision_error_string}"
-        )
-
     # Enable TF32 for faster training on Ampere GPUs,
     # cf https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices
     if args.allow_tf32:
@@ -296,7 +292,13 @@ def main(args):
         optimizer_class = torch.optim.AdamW
 
     # Optimizer creation
-    params_to_optimize = controlnet.parameters()
+    params_to_optimize = (
+        [p for p in unet.conv_norm_out.parameters()]
+        + [p for p in unet.conv_out.parameters()]
+        + [p for p in unet.up_blocks[2].parameters()]
+        + [p for p in unet.up_blocks[1].attentions.parameters()]
+        + [p for p in unet.up_blocks[0].attentions.parameters()]
+    )
     optimizer = optimizer_class(
         params_to_optimize,
         lr=args.learning_rate,
@@ -313,7 +315,7 @@ def main(args):
     elif accelerator.mixed_precision == "bf16":
         weight_dtype = torch.bfloat16
 
-    # Move text_encoder to device and cast to weight_dtype
+    # Move vae, unet and text_encoder to device and cast to weight_dtype
     text_encoder_one.to(accelerator.device, dtype=weight_dtype)
     text_encoder_two.to(accelerator.device, dtype=weight_dtype)
 
@@ -375,20 +377,29 @@ def main(args):
             compute_embeddings_fn,
             batched=True,
             new_fingerprint=new_fingerprint,
-            batch_size=200,
+            batch_size=20,
         )
 
     del text_encoders, tokenizers
     gc.collect()
     torch.cuda.empty_cache()
 
-    # Move the vae and unet to device after flushing text_encoders
+    # Loading the other models to device only after flushing text encoders
     # The VAE is in float32 to avoid NaN losses.
     if args.pretrained_vae_model_name_or_path is not None:
         vae.to(accelerator.device, dtype=weight_dtype)
     else:
         vae.to(accelerator.device, dtype=torch.float32)
-    unet.to(accelerator.device, dtype=weight_dtype)
+
+    # Loading the non-trainable weights of unet as fp16 and the trainable weights to fp32
+    # This reduces the GPU memory usage to avoid CUDA problems
+    unet.to(dtype=weight_dtype)
+    unet.conv_norm_out.to(dtype=torch.float32)
+    unet.conv_out.to(dtype=torch.float32)
+    unet.up_blocks[2].to(dtype=torch.float32)
+    unet.up_blocks[1].attentions.to(dtype=torch.float32)
+    unet.up_blocks[0].attentions.to(dtype=torch.float32)
+    controlnet.to(accelerator.device, dtype=weight_dtype)
 
     # Then get the training dataset ready to be passed to the dataloader.
     train_dataset = prepare_train_dataset(args, train_dataset_original, accelerator)
@@ -401,7 +412,6 @@ def main(args):
         num_workers=args.dataloader_num_workers,
     )
 
-    batch = next(iter(train_dataloader))
     # Scheduler and math around the number of training steps.
     # Check the PR https://github.com/huggingface/diffusers/pull/8312 for detailed explanation.
     num_warmup_steps_for_scheduler = args.lr_warmup_steps * accelerator.num_processes
@@ -432,8 +442,8 @@ def main(args):
     )
 
     # Prepare everything with our `accelerator`.
-    controlnet, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
-        controlnet, optimizer, train_dataloader, lr_scheduler
+    unet, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
+        unet, optimizer, train_dataloader, lr_scheduler
     )
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
@@ -524,7 +534,7 @@ def main(args):
     image_logs = None
     for epoch in range(first_epoch, args.num_train_epochs):
         for step, batch in enumerate(train_dataloader):
-            with accelerator.accumulate(controlnet):
+            with accelerator.accumulate(unet):
                 # Convert images to latent space
                 if args.pretrained_vae_model_name_or_path is not None:
                     pixel_values = batch["pixel_values"].to(dtype=weight_dtype)
@@ -594,7 +604,7 @@ def main(args):
 
                 accelerator.backward(loss)
                 if accelerator.sync_gradients:
-                    params_to_clip = controlnet.parameters()
+                    params_to_clip = unet.parameters()
                     accelerator.clip_grad_norm_(params_to_clip, args.max_grad_norm)
                 optimizer.step()
                 lr_scheduler.step()
@@ -644,7 +654,8 @@ def main(args):
                         save_path = os.path.join(
                             args.output_dir, f"checkpoint-{global_step}"
                         )
-                        accelerator.save_state(save_path)
+                        # accelerator.save_state(save_path)
+                        unwrap_model(unet).save_pretrained(save_path)
                         logger.info(f"Saved state to {save_path}")
 
                     if (
@@ -679,15 +690,17 @@ def main(args):
             num_workers=args.dataloader_num_workers,
         )
 
-        controlnet, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
-            controlnet, optimizer, train_dataloader, lr_scheduler
+        unet, optimizer, train_dataloader, lr_scheduler = accelerator.prepare(
+            unet, optimizer, train_dataloader, lr_scheduler
         )
 
     # Create the pipeline using using the trained modules and save it.
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
         controlnet = unwrap_model(controlnet)
-        controlnet.save_pretrained(args.output_dir)
+        unet = unwrap_model(unet)
+        controlnet.save_pretrained(args.output_dir + "/controlnet")
+        unet.save_pretrained(args.output_dir + "/unet")
 
         # Run a final round of validation.
         # Setting `vae`, `unet`, and `controlnet` to None to load automatically from `args.output_dir`.
