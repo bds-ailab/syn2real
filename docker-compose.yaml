@@ -182,6 +182,39 @@ services:
       - models:/models
       - output:/out
 
+  model_eval:
+    image: ${IMAGE_NAME_EVAL}:${IMAGE_TAG_EVAL}
+    build:
+      context: ./src/model_eval
+      shm_size: ${HIGH_SHM:-10gb}
+      args:
+        http_proxy: ${HTTP_PROXY}
+        https_proxy: ${HTTPS_PROXY}
+        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
+        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        MY_ACC_NAME: ${MY_ACC_NAME}
+        MY_USER_ID: ${MY_USER_ID}
+        GROUP_NAME: ${GROUP_NAME}
+        GROUP_ID: ${GROUP_ID}
+        REGISTRY: ${RELEASE_REGISTRY}
+        SRC_PATH: ${SRC_PATH:?error}
+        NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
+    shm_size: ${HIGH_SHM:-10gb}
+    stdin_open: true
+    tty: true
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      https_proxy: ${HTTPS_PROXY}
+      GROUP_ID: ${GROUP_ID}
+      GROUP_NAME: ${GROUP_NAME}
+      USER_ID: ${USER_ID}
+      USER_NAME: ${USER_NAME}
+    volumes:
+      - data:/data
+      - src_path_eval:/model_eval
+      - models:/models
+      - output:/out
+
 volumes:
   data:
     driver_opts:
@@ -218,6 +251,11 @@ volumes:
       type: none
       o: bind
       device: ${SRC_PATH:?error}/controlnet_sdxl
+  src_path_eval:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:?error}/model_eval
   models:
     driver_opts:
       type: none

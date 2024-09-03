@@ -1,0 +1,10 @@
+train_dataset: "/data/cityscapes_aug/"
+test_dataset: "/data/cityscapes_real/"
+pretrained_model: None
+epochs: 20 
+lr: 0.00001
+batch_size: 4
+save_model_repo: "./segformer-b0-finetuned-aug_data"
+dataloader_num_workers: 30
+save_steps: 1000
+eval_steps: 1000
