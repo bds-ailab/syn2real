@@ -124,6 +124,11 @@ def construct_conditioning_image(image, conditioning_image):
     image = Image.open(image).convert("RGB")
     conditioning_image = Image.open(conditioning_image).convert("RGB")
 
+    if conditioning_image.size[0] > image.size[0]:
+        conditioning_image = conditioning_image.resize(image.size)
+    elif conditioning_image.size[0] < image.size[0]:
+        image = image.resize(conditioning_image.size)
+
     # Transform to numpy arrays
     image_array = np.array(image)
     conditioning_image_array = np.array(conditioning_image)
@@ -276,17 +281,20 @@ def process_dataset(args):
         else:
             # Creating new folders in case they don't exist
             os.mkdir(path.join(args.out_dataset_folder, "images"))
-            os.mkdir(path.join(args.out_dataset_folder, "conditioning_image"))
+            os.mkdir(path.join(args.out_dataset_folder, "conditioning_images"))
     else:
         # Creating new folders in case they don't exist
         os.mkdir(args.out_dataset_folder)
         os.mkdir(path.join(args.out_dataset_folder, "images"))
-        os.mkdir(path.join(args.out_dataset_folder, "conditioning_image"))
+        os.mkdir(path.join(args.out_dataset_folder, "conditioning_images"))
 
     # Reading json data of the new dataset to transform
     in_data = read_json_data(args.in_json_file)
-    # Reading json data from the existing train dataset (that will be extended)
-    out_data = read_json_data(args.out_json_file)
+    if os.path.isfile(args.out_json_file):
+        # Reading json data from the existing train dataset (that will be extended)
+        out_data = read_json_data(args.out_json_file)
+    else:
+        out_data = []
 
     # Constructing SDXL+ControlNet pipeline
     pipe = load_pipeline(args)
@@ -295,15 +303,18 @@ def process_dataset(args):
     batch = {"im": [], "cond": [], "text": []}
     for i in range(len(in_data)):
         # Constructing conditioning image (segmenatation + Canny)
+        img_name = in_data[i]["conditioning_image"].split("/")[-1]
+
         conditioning_image, trans_conditioning_image = construct_conditioning_image(
-            in_data[i]["image"], in_data[i]["conditioning_image"]
+            in_data[i]["image"], os.path.join("/out/sam_annotations/", img_name)
         )
         batch["im"].append(trans_conditioning_image)
         # Using 'real' for inference
         prompt = " ".join(["a", "real"] + in_data[i]["text"].split(" ")[2:])
         batch["text"].append(prompt)
         batch["cond"].append(conditioning_image)
-        if not (i % 3) and i:
+        # print(i)
+        if not (i % 4) and i:
             # Generate augmented images
             aug_images = transform_img(pipe, batch)
             batch["im"] = aug_images
@@ -321,6 +332,3 @@ if __name__ == "__main__":
     args = parse_args()
     # 3, 2, 1 go ! ^^
     process_dataset(args)
-
-    # Example Command :
-    # python prepare_new_dataset.py --in_json_file="/data/cityscape/syn_city/images03/data_captionned.json" --out_json_file="/data/cityscapes/train.jsonl" --out_dataset_folder="/data/cityscapes" --unet_path="/out/controlnet_sdxl_unlocked_attention/checkpoint-5000/" --controlnet_path="/out/controlnet_sdxl_active_round1/"

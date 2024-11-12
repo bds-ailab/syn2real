@@ -102,30 +102,45 @@ def prepare_train_dataset(args, dataset, accelerator):
     Returns:
         Dataset: transformed dataset
     """
-    # Resize target images, transform them to tensors and normalize
-    image_transforms = transforms.Compose(
-        [
-            transforms.Resize(
-                (args.resolution // 2, args.resolution),
-                interpolation=transforms.InterpolationMode.BILINEAR,
-            ),
-            # transforms.CenterCrop(args.resolution),
-            transforms.ToTensor(),
-            transforms.Normalize([0.5], [0.5]),
-        ]
-    )
 
-    # Resize conditioning images and transform them to tensors
-    conditioning_image_transforms = transforms.Compose(
-        [
-            transforms.Resize(
-                (args.resolution // 2, args.resolution),
-                interpolation=transforms.InterpolationMode.BILINEAR,
-            ),
-            # transforms.CenterCrop(args.resolution),
-            transforms.ToTensor(),
-        ]
-    )
+    def adaptative_image_trans(original_size):
+        if original_size[0] > 2 * original_size[1]:
+            crop_shape = (original_size[1], original_size[1] * 2)
+        else:
+            crop_shape = (original_size[0] // 2, original_size[0])
+        # Resize target images, transform them to tensors and normalize
+        image_transforms = transforms.Compose(
+            [
+                transforms.CenterCrop(crop_shape),
+                transforms.Resize(
+                    (args.resolution // 2, args.resolution),
+                    interpolation=transforms.InterpolationMode.BILINEAR,
+                ),
+                # transforms.CenterCrop(args.resolution),
+                transforms.ToTensor(),
+                transforms.Normalize([0.5], [0.5]),
+            ]
+        )
+        return image_transforms
+
+    def adaptative_cond_trans(original_size):
+        if original_size[0] > 2 * original_size[1]:
+            crop_shape = (original_size[1], original_size[1] * 2)
+        else:
+            crop_shape = (original_size[0] // 2, original_size[0])
+        # Resize conditioning images and transform them to tensors
+        conditioning_image_transforms = transforms.Compose(
+            [
+                transforms.CenterCrop(crop_shape),
+                transforms.Resize(
+                    (args.resolution // 2, args.resolution),
+                    interpolation=transforms.InterpolationMode.NEAREST,
+                ),
+                # transforms.CenterCrop(args.resolution),
+                transforms.ToTensor(),
+            ]
+        )
+        return conditioning_image_transforms
 
     def generate_wave(size):
         """Generates random wave function to distort segmentation maps images
@@ -321,8 +336,8 @@ def prepare_train_dataset(args, dataset, accelerator):
             # Augment conditioning images
             cond_im = augment_train(im, cond_im, examples["syn_or_real"][i])
             # Transform images
-            images.append(image_transforms(im))
-            conditioning_images.append(conditioning_image_transforms(cond_im))
+            images.append(adaptative_image_trans(im.size)(im))
+            conditioning_images.append(adaptative_cond_trans(cond_im.size)(cond_im))
 
         examples["pixel_values"] = images
         examples["conditioning_pixel_values"] = conditioning_images

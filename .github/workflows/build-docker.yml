@@ -83,6 +83,8 @@ jobs:
           IMAGE_TAG_SDXL: ${{ env.IMAGE_TAG }}
           IMAGE_NAME_EVAL: ${{ steps.get-image-name.outputs.snapshot-name }}/eval
           IMAGE_TAG_EVAL: ${{ env.IMAGE_TAG }}
+          IMAGE_NAME_GAN: ${{ steps.get-image-name.outputs.snapshot-name }}/gan
+          IMAGE_TAG_GAN: ${{ env.IMAGE_TAG }}
           IMAGE_NAME: ${{ steps.get-image-name.outputs.snapshot-name }}
 
           # Use legacy builder
@@ -111,6 +113,9 @@ jobs:
 
       - name: 📦 Store the model evaluation image
         run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}/eval:${{ env.IMAGE_TAG }}
+
+      - name: 📦 Store the cyclegan turbo image
+        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}/gan:${{ env.IMAGE_TAG }}
 
       - name: 📜 Summary
         run: |

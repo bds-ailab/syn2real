@@ -34,9 +34,12 @@ RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" && \
     useradd -m -u "${SERVICE_ACC_UID}" -l "${SERVICE_ACC_NAME}" -G "${GROUP_NAME}"
 
 # Copy working dir to clone the git repo inside
-COPY ./diffusers /diffusers
+COPY ./diffusers/* /diffusers/
 COPY ./requirements_add.txt /requirements_add.txt
 RUN rm /diffusers/README.md
+
+# COPY ./segadapt/* /segadapt/ 
+# RUN rm /segadapt/README.md
 
 # Install python packages
 RUN pip --no-cache-dir install --upgrade pip\
@@ -44,7 +47,7 @@ RUN pip --no-cache-dir install --upgrade pip\
     && pip install --no-cache-dir -e /diffusers/.\
     && pip install --no-cache-dir -r /diffusers/examples/controlnet/requirements_sdxl.txt\
     && pip install --no-cache-dir -r /requirements_add.txt
-
+    
 # Copy source code
 USER "${SERVICE_ACC_NAME}":"${GROUP_NAME}"
 COPY --chown="${SERVICE_ACC_NAME}":"${GROUP_NAME}" ./* /sdxl/

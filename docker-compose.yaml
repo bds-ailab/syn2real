@@ -186,6 +186,39 @@ services:
     image: ${IMAGE_NAME_EVAL}:${IMAGE_TAG_EVAL}
     build:
       context: ./src/model_eval
+      shm_size: 20gb
+      args:
+        http_proxy: ${HTTP_PROXY}
+        https_proxy: ${HTTPS_PROXY}
+        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
+        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        MY_ACC_NAME: ${MY_ACC_NAME}
+        MY_USER_ID: ${MY_USER_ID}
+        GROUP_NAME: ${GROUP_NAME}
+        GROUP_ID: ${GROUP_ID}
+        REGISTRY: ${RELEASE_REGISTRY}
+        SRC_PATH: ${SRC_PATH:?error}
+        NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
+    shm_size: 20gb
+    stdin_open: true
+    tty: true
+    environment:
+      http_proxy: ${HTTP_PROXY}
+      https_proxy: ${HTTPS_PROXY}
+      GROUP_ID: ${GROUP_ID}
+      GROUP_NAME: ${GROUP_NAME}
+      USER_ID: ${USER_ID}
+      USER_NAME: ${USER_NAME}
+    volumes:
+      - data:/data
+      - src_path_eval:/model_eval
+      - models:/models
+      - output:/out
+
+  gan:
+    image: ${IMAGE_NAME_GAN}:${IMAGE_TAG_GAN}
+    build:
+      context: ./src/gan
       shm_size: ${HIGH_SHM:-10gb}
       args:
         http_proxy: ${HTTP_PROXY}
@@ -211,7 +244,7 @@ services:
       USER_NAME: ${USER_NAME}
     volumes:
       - data:/data
-      - src_path_eval:/model_eval
+      - src_path_gann:/gan
       - models:/models
       - output:/out
 
@@ -256,6 +289,11 @@ volumes:
       type: none
       o: bind
       device: ${SRC_PATH:?error}/model_eval
+  src_path_gann:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:?error}/gan
   models:
     driver_opts:
       type: none

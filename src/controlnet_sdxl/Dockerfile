@@ -43,7 +43,9 @@ RUN pip --no-cache-dir install --upgrade pip\
     && git clone https://github.com/huggingface/diffusers /diffusers/\
     && pip install --no-cache-dir -e /diffusers/.\
     && pip install --no-cache-dir -r /diffusers/examples/controlnet/requirements_sdxl.txt\
-    && pip install --no-cache-dir -r /requirements_add.txt
+    && pip install --no-cache-dir -r /requirements_add.txt\
+    && pip install git+https://github.com/facebookresearch/segment-anything.git\
+    && pip install opencv-python pycocotools matplotlib onnxruntime onnx 
 
 # Copy source code
 USER "${SERVICE_ACC_NAME}":"${GROUP_NAME}"

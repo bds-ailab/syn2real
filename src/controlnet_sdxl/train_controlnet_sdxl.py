@@ -100,7 +100,7 @@ def main(args):
     # Handle the repository creation
     if accelerator.is_main_process:
         if args.output_dir is not None:
-            #             os.makedirs(args.output_dir, exist_ok=True)
+            os.makedirs(args.output_dir, exist_ok=True)
             print(os.listdir(args.output_dir))
 
         if args.push_to_hub:
@@ -724,4 +724,5 @@ def main(args):
 if __name__ == "__main__":
     torch.cuda.empty_cache()
     args = parse_args()
+    print(args.segmentation)
     main(args)

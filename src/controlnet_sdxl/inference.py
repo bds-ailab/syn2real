@@ -27,7 +27,9 @@ def main(pipe, cond_image_paths, prompts, seed):
     """
 
     # Load test image
-    control_images = [load_image(path).convert("RGB") for path in cond_image_paths]
+    control_images = [
+        load_image(path).convert("RGB").resize((1024, 512)) for path in cond_image_paths
+    ]
 
     # generate image
     generator = torch.manual_seed(seed)
@@ -194,7 +196,7 @@ if __name__ == "__main__":
         c = np.random.choice(colors)
         # Detailed prompt
         prompts = [
-            f"a real picture of a city street with a {c} car and bus driving down it in asunny day. not artifacted."
+            f"a real picture of a city street with a {c} car and bus driving down it in a sunny day. not artifacted."
         ]
         # Inference
         aug_images = main(pipe, cond_images, prompts, seed=i)
@@ -205,4 +207,8 @@ if __name__ == "__main__":
         sharpen(out_img_path, out_img_path)
 
     # Example command :
-    # python inference.py --cond_image_path='test_images/cond_image2.png' --controlnet_path='/out/controlnet_sdxl_active_round2_distortion/checkpoint-14500/controlnet/' --unet_path='/out/controlnet_sdxl_unlocked_attention/unet/' --out_path='test_images/img4_out/'
+    # Checkpoints used for paper v1 : python inference.py --cond_image_path='sam_inference/mask.png' --controlnet_path='/out/controlnet_sdxl_active_round2_distortion/checkpoint-20000/controlnet/' --unet_path='/out/controlnet_sdxl_unlocked_attention/unet/' --out_path='sam_inference/'
+    # Last Checkpoints of controlnet without segmentation for real images (just canny) : python inference.py --cond_image_path='sam_inference/mask.png' --controlnet_path='/out/controlnet_withouseg4real/round2_controlnet/checkpoint-5000/controlnet/' --unet_path='/out/controlnet_withouseg4real/round1_unet/checkpoint-5000/' --out_path='sam_inference/'
+    # Last Checkpoints of controlnet sam segmentation for all images (+ canny) : python inference.py --cond_image_path='sam_inference/mask_sam.png' --controlnet_path='/out/controlnet_sam/round2_controlnet/checkpoint-5000/controlnet/' --unet_path='/out/controlnet_sam/round2_unet/checkpoint-5000/' --out_path='sam_inference/'
+    # Last Checkpoints of controlnet with human segmentation for synthetic and SAM for real images (+canny) : python inference.py --cond_image_path='sam_inference/mask.png' --controlnet_path='/out/controlnet_mix/round1_controlnet/checkpoint-20000/controlnet/' --unet_path='/out/controlnet_withouseg4real/round1_unet/checkpoint-5000/' --out_path='sam_inference/'
+    # Last Checkpoints of controlnet on bdd dataset (generates artifacts) : python inference.py --cond_image_path='sam_inference/mask.png' --controlnet_path='/out/controlnet_bdd/round1_controlnet/checkpoint-20000/controlnet/' --unet_path='/out/controlnet_withouseg4real/round1_unet/checkpoint-5000/' --out_path='sam_inference/'

@@ -1,15 +1,20 @@
 <h1>LLMs for data semantic augmentation</h1>
 
-<h3>Project Goal</h1>
-Using synthetically generated images for deep learning purposes has great advantages of perfect knowledge about the scenes parameters such as objects positions, depth, labels ... However, Training DL models directly on such datasets induces a biais which affects the model's performances on real world images (Domain shift problem). This project aims to enhance the realism of synthetic images and semantically augment the existing objects in a given scene using diffusion models.
+<h3>Description</h3>
 
-<h3>Methodology</h1>
+This repository provides a proof of concept for semantic augmentation of synthetic images using diffusion models. Each pipeline component is encapsulated in a Docker container, and all containers (services) are managed through a Docker Compose file.
 
-After close research in the <a href="https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Real+%3A%3A+State+of+the+art" target="_blank">state of the art</a>, ControlNet was found to be very suitable for our use case and its requirements. ControlNet combines good conditioning capacities with great generalization potential on top of light training costs. However, ControlNet alone is still not sufficient to generate hyper-realistic images.For this reason, it will be trained averserially with a discriminator that detects fake images from real images. The discriminator will push the generator (ControlNet) to produce images with high plausibility to be real (see strategy in figure below).   
+<h3>Detailed documentation links</h3>
 
-![alt text](img/strategy.png)
+- State of the art study: <a href="https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Real+%3A%3A+State+of+the+art" target="_blank">CV:Data:Synset:Syn2Real:State of the art-BDS R&D CVLab-Confluence</a>
 
-<h3>Installation [Using Docker]</h1>
+- General strategy: <a href="https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Real+%3A%3A+General+approach" target="_blank">CV:Data:Synset:Syn2Real:General Approach-BDS R&D CVLab-Confluence</a>
+
+- Training experiments and results: <a href="https://confluencebdsfr.fsc.atos-services.net/pages/viewpage.action?pageId=618758247" target="_blank">CV:Data:Synset:Syn2Real:Controlnet training -BDS R&D CVLab-Confluence</a> 
+
+- Computation acceleration methods: <a href="https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Real+%3A%3A+Acceleration" target="_blank">CV:Data:Synset:Syn2Real:Acceleration-BDS R&D CVLab-Confluence</a> 
+
+<h3>Installation</h3>
 
 1. Clone the repository and its submodules:
 
@@ -18,7 +23,7 @@ After close research in the <a href="https://confluencebdsfr.fsc.atos-services.n
     cd synset-poc-llm_data_augmentation
     ```
 
-2. Configure your environment variables in the `.env` file:
+2. Copy the file .template-env and Configure your environment variables in the `.env` file:
 
     ```python
     # Replace the fields with your personal informations
@@ -28,24 +33,58 @@ After close research in the <a href="https://confluencebdsfr.fsc.atos-services.n
     USER_ID=
     GROUP_NAME=
     GROUP_ID=
+    # Add the absolute paths for the different folder for volumes mount 
+    DATA_PATH=
+    SRC_PATH=
+    MODEL_PATH=
+    OUT_PATH=
     ```
 
-3. Configure the volume mapping for your dataset in the `docker-compose.yaml` file:
-
-    ```yaml
-    ...
-
-    volumes:
-        - /YOUR/PATH/TO/THE/DATASET/IN/HOST:/home/${USER_NAME}/data
-        - /YOUR/PATH/TO/THE/SRC_CODE/IN/HOST:/home/${USER_NAME}/src
-    ...
-    ```
-    Ensure that the left part of the volume mapping corresponds to the dataset's path on your host machine.
-
-4. Launch Docker:
+3. Build Docker services:
 
     ```
     docker compose up
     ```
 
-<!-- TODO : Update Readme -->
+<h3>Important services</h3>
+
+1. controlnet_sdxl: This service contains all the training & evaluation scripts for Controlnet-SDXL using FMLE experiments. The script [launch.sh](../src/controlnet_sdxl/launch.sh) starts the training of controlnet using previous checkpoints and a given dataset, it can be used to launch to the experiment on FMLE. the script will automatically create the output folders using the name given as argument.
+
+    ```
+    # Complete the output path of the checkpoints
+    export OUTPUT_DIR="/out/..."
+    # The original stable diffusion xl weights (don't modify)
+    export MODEL_DIR="stabilityai/stable-diffusion-xl-base-1.0"
+    # Modify if needed to start the training from previous checkpoints
+    export CONTROLNET_DIR="None"
+    # Modify if needed to start the training from previous checkpoints
+    export UNET_DIR="None"
+    ```
+
+    The script [infer.sh](../src/controlnet_sdxl/infer.sh) transforms a synthetic dataset to the real domain using the given checkpoints and save it. Need to modify the checkpoints names for controlnet and unet to be used during the inference. 
+
+2. model_eval: This service encapsulates the evaluation methods by qualitative methods such as CLIP embeddings or quantitative methods by training an independent segmenter on the generated data and testing it on real images to measure the domain shift gap. The script [launch.sh](../src/model_eval/launch.sh) trains a DeepLabv3 segmentation model on a given dataset, test it on a real dataset and save the checkpoints and performances details. 
+    ```
+    # Specify the training dataset (typically generated images dataset)
+    export TRAIN_DATA_DIR=
+    # Specify the test dataset (typically real world images)
+    export TEST_DATA_DIR=
+    # Specify the ouput folder of the experiment 
+    # where performance details and model checkpoint will be saved
+    export EXP_OUT_FOLDER=
+    ```
+
+
+<h3>Some Results</h3>
+
+Here’s an example of our model's output from a synthetic input image with various instructions provided in the text prompt. The model successfully enhances the realism of synthetic images while adhering to prompt instructions, such as specific car colors, and preserving the semantic integrity of each object from the original image.
+
+![alt text](img/variation.png)
+
+We also compared the generated results with other well-known state-of-the-art style translation models, such as CycleGAN-Turbo. Unlike CycleGAN, our model preserves the semantic layout of the image with high fidelity while achieving realistic textures.
+
+![alt text](img/gen_comp.png)
+
+Lastly, we compare the inference results of the segmentation model trained on various datasets, including the one generated by our style translation model. The segmenter’s output shows a remarkable improvement in detecting the different classes within the image.
+
+![alt text](img/segmentation_comp.png)

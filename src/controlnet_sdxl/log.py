@@ -233,6 +233,15 @@ def parse_args(input_args=None):
             "Whether or not to add Canny edges as second form of control in addition to segmentation maps"
         ),
     )
+
+    parser.add_argument(
+        "--segmentation",
+        action="store_true",
+        help=(
+            "Whether or not to add segmentation maps as first form of control in addition to canny edges"
+        ),
+    )
+
     parser.add_argument(
         "--output_dir",
         type=str,
