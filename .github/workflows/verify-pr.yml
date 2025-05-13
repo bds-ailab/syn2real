@@ -70,7 +70,6 @@ jobs:
         with:
           jupyter: true
           src: ${{ join(fromJSON(needs.changes.outputs.python_files), ' ') }}
-          version: '~= 24.2.0'
         continue-on-error: true
 
       - name: 🔗 Get logs url
