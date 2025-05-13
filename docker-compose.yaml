@@ -7,8 +7,8 @@ services:
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
-        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
-        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        USER_NAME: ${USER_NAME}
+        USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
@@ -37,8 +37,8 @@ services:
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
-        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
-        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        USER_NAME: ${USER_NAME}
+        USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
@@ -67,8 +67,8 @@ services:
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
-        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
-        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        USER_NAME: ${USER_NAME}
+        USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
@@ -88,7 +88,7 @@ services:
       - src_path_blip:/blip_caption
       - models:/models
       - output:/out
-      
+
   mlflow:
     image: ${IMAGE_NAME_MLFLOW}:${IMAGE_TAG_MLFLOW}
     build:
@@ -97,8 +97,8 @@ services:
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
-        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
-        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        USER_NAME: ${USER_NAME}
+        USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
@@ -127,8 +127,8 @@ services:
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
-        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
-        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
+        USER_NAME: ${USER_NAME}
+        USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
@@ -157,10 +157,8 @@ services:
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
-        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
-        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
-        MY_ACC_NAME: ${MY_ACC_NAME}
-        MY_USER_ID: ${MY_USER_ID}
+        USER_NAME: ${USER_NAME}
+        USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
@@ -190,10 +188,8 @@ services:
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
-        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
-        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
-        MY_ACC_NAME: ${MY_ACC_NAME}
-        MY_USER_ID: ${MY_USER_ID}
+        USER_ID: ${USER_ID}
+        USER_NAME: ${USER_NAME}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
@@ -223,10 +219,8 @@ services:
       args:
         http_proxy: ${HTTP_PROXY}
         https_proxy: ${HTTPS_PROXY}
-        SERVICE_ACC_NAME: ${SERVICE_ACC_NAME}
-        SERVICE_ACC_UID: ${SERVICE_ACC_UID}
-        MY_ACC_NAME: ${MY_ACC_NAME}
-        MY_USER_ID: ${MY_USER_ID}
+        USER_NAME: ${USER_NAME}
+        USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
         REGISTRY: ${RELEASE_REGISTRY}
