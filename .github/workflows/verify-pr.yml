@@ -83,7 +83,7 @@ jobs:
           ) >> $GITHUB_OUTPUT
 
       - name: 💬 Add comment to PR
-        uses: .github/actions/create-or-update-comment
+        uses: ./.github/actions/create-or-update-comment
         if: ${{ steps.black.outcome == 'failure' }}
         with:
           body: |
@@ -96,7 +96,7 @@ jobs:
           search-string: '### ⚫ Black formatter'
 
       - name: 💬 Add comment to PR
-        uses: .github/actions/create-or-update-comment
+        uses: ./.github/actions/create-or-update-comment
         if: ${{ steps.black.outcome != 'failure' }}
         with:
           body: |
@@ -136,7 +136,7 @@ jobs:
         continue-on-error: true
 
       - name: 💬 Add comment to PR
-        uses: .github/actions/create-or-update-comment
+        uses: ./.github/actions/create-or-update-comment
         if: ${{ steps.hadolint.outcome == 'failure' }}
         with:
           body: |
@@ -151,7 +151,7 @@ jobs:
           search-string: '### 🐳 Hadolint `${{ matrix.dockerfile }}`'
 
       - name: 💬 Add comment to PR
-        uses: .github/actions/create-or-update-comment
+        uses: ./.github/actions/create-or-update-comment
         if: ${{ steps.hadolint.outcome != 'failure' }}
         with:
           body: |
