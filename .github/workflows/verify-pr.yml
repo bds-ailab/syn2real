@@ -203,8 +203,8 @@ jobs:
         id: sonar
         uses: sonarsource/sonarqube-scan-action@v5
         env:
-          SONAR_TOKEN: ${{ secrets.GLB_BDS_SF2_SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ vars.SF2_SONARQUBE_URL }}
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONARQUBE_HOST }}
         with:
           args: >
             -Dsonar.projectKey=${{ github.repository_owner }}:${{ github.event.repository.name }}
@@ -212,12 +212,9 @@ jobs:
             -Dsonar.links.homepage=${{ github.server_url }}/${{ github.repository }}
             -Dsonar.links.ci=${{ github.server_url }}/${{ github.repository }}/actions/
             -Dsonar.links.scm=${{ github.server_url }}/${{ github.repository }}
-            -Dsonar.scanner.proxyHost=${{ secrets.HTTP_PROXY_IP }}
-            -Dsonar.scanner.proxyPort=${{ vars.HTTP_PROXY_PORT }}
             -Dsonar.python.xunit.reportPath=reports/${{ needs.testing.outputs.junit }}
             -Dsonar.python.coverage.reportPaths=reports/${{ needs.testing.outputs.coverage }}
             -Dsonar.qualitygate.wait=true
-          fail_on_error: true
 
   pr-ready-to-merge:
     needs:
