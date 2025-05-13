@@ -9,7 +9,7 @@ on:
 jobs:
   changes:
     name: 📁 Verify files that changed
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     # Required permissions
     permissions:
       pull-requests: read
@@ -47,7 +47,7 @@ jobs:
   lint-python:
     needs: changes
     if: ${{ always() && needs.changes.outputs.python == 'true' }}
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     name: 🐍 Lint python and jupyter
     outputs:
       failure: ${{ steps.black.outcome == 'failure' }}
@@ -105,7 +105,7 @@ jobs:
   lint-docker:
     needs: changes
     if: ${{ always() && needs.changes.outputs.docker == 'true' }}
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     name: 🐳 Lint ${{ matrix.dockerfile }}
     outputs:
       failure: ${{ steps.hadolint == 'failure' }}
@@ -160,7 +160,7 @@ jobs:
   lint-shell:
     needs: changes
     if: ${{ always() && needs.changes.outputs.shell == 'true' }}
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     name: 🐚 Lint shell scripts
     outputs:
       failure: ${{ steps.shellcheck.outcome == 'failure' }}
@@ -189,7 +189,7 @@ jobs:
       - lint-shell
       - changes
     if: ${{ always() }}
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     name: 🔍 Verify PR is ready to merge
     steps:
       - name: 'Verify: 📁 Verify files that changed'
