@@ -76,9 +76,6 @@ jobs:
           IMAGE_TAG_GAN: ${{ env.IMAGE_TAG }}
           IMAGE_NAME: ${{ steps.get-image-name.outputs.snapshot-name }}
 
-          # Use legacy builder
-          DOCKER_BUILDKIT: '0'
-
         # With no-cache because of pip dependencies
         run: docker compose build
 
