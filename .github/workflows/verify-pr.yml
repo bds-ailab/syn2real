@@ -1,13 +1,22 @@
-name: 🧪 Verify pull request
-run-name: '🧪 Gab is verifying PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}'
+name: 🧪 Run tests and linter
+run-name: >-
+  ${{ github.event_name == 'pull_request' &&
+    format('🧪 Gab is verifying PR #{0} : {1}', github.event.pull_request.number, github.event.pull_request.title)
+  ||
+    format('🧪 Gab is verifying {0}', github.ref_name)
+  }}
 
 # Based on https://github.gsissc.myatos.net/GLB-BDS-AILAB-CV/tools-shared_workflows/blob/main/.github/workflows/lint-pr.yml v1.5.0
 
 on:
-  - pull_request
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   changes:
+    if: github.event_name == 'pull_request'
     name: 📁 Verify files that changed
     runs-on: ubuntu-latest
     # Required permissions
@@ -182,6 +191,37 @@ jobs:
             ./.cache/*
           fail_on_error: true
 
+  sonar:
+    needs: changes
+    if: ${{ always() && needs.changes.outputs.shell == 'true' }}
+    runs-on: ubuntu-latest
+    name: ☢️ Run Sonar analysis
+    outputs:
+      failure: ${{ steps.sonar.outcome == 'failure' }}
+    steps:
+      - name: 📂 Checkout
+        uses: actions/checkout@v3
+
+      - name: ☢️ Sonar analysis
+        id: sonar
+        uses: sonarsource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.GLB_BDS_SF2_SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SF2_SONARQUBE_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ github.repository_owner }}:${{ github.event.repository.name }}
+            -Dsonar.projectName=${{ github.repository_owner }}:${{ github.event.repository.name }}
+            -Dsonar.links.homepage=${{ github.server_url }}/${{ github.repository }}
+            -Dsonar.links.ci=${{ github.server_url }}/${{ github.repository }}/actions/
+            -Dsonar.links.scm=${{ github.server_url }}/${{ github.repository }}
+            -Dsonar.scanner.proxyHost=${{ secrets.HTTP_PROXY_IP }}
+            -Dsonar.scanner.proxyPort=${{ vars.HTTP_PROXY_PORT }}
+            -Dsonar.python.xunit.reportPath=reports/${{ needs.testing.outputs.junit }}
+            -Dsonar.python.coverage.reportPaths=reports/${{ needs.testing.outputs.coverage }}
+            -Dsonar.qualitygate.wait=true
+          fail_on_error: true
+
   pr-ready-to-merge:
     needs:
       - lint-python
@@ -206,4 +246,8 @@ jobs:
 
       - name: 'Verify: 🐚 Lint Shell scripts'
         if: ${{ needs.lint-shell.outputs.failure == 'true' }}
+        run: exit 1
+
+      - name: 'Verify: ☢️ Run Sonar analysis'
+        if: ${{ needs.sonar.outputs.failure == 'true' }}
         run: exit 1
