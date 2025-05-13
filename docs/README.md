@@ -1,24 +1,24 @@
-<h1>LLMs for data semantic augmentation</h1>
+# LLMs for data semantic augmentation
 
-<h3>Description</h3>
+## Description
 
 This repository provides a proof of concept for semantic augmentation of synthetic images using diffusion models. Each pipeline component is encapsulated in a Docker container, and all containers (services) are managed through a Docker Compose file.
 
-<h3>Detailed documentation links</h3>
+## Detailed documentation links
 
-- State of the art study: <a href="https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Real+%3A%3A+State+of+the+art" target="_blank">CV:Data:Synset:Syn2Real:State of the art-BDS R&D CVLab-Confluence</a>
+- State of the art study: [CV:Data:Synset:Syn2Real:State of the art-BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Real+%3A%3A+State+of+the+art)
 
-- General strategy: <a href="https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Real+%3A%3A+General+approach" target="_blank">CV:Data:Synset:Syn2Real:General Approach-BDS R&D CVLab-Confluence</a>
+- General strategy: [CV:Data:Synset:Syn2Real:General Approach-BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Reald+%3A%3A+General+approach)
 
-- Training experiments and results: <a href="https://confluencebdsfr.fsc.atos-services.net/pages/viewpage.action?pageId=618758247" target="_blank">CV:Data:Synset:Syn2Real:Controlnet training -BDS R&D CVLab-Confluence</a> 
+- Training experiments and results: [CV:Data:Synset:Syn2Real:Controlnet training -BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/pagesd/viewpage.action?pageId=618758247)
 
-- Computation acceleration methods: <a href="https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Real+%3A%3A+Acceleration" target="_blank">CV:Data:Synset:Syn2Real:Acceleration-BDS R&D CVLab-Confluence</a> 
+- Computation acceleration methods: [CV:Data:Synset:Syn2Real:Acceleration-BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3Ad+Syn2Real+%3A%3A+Acceleration)
 
-<h3>Installation</h3>
+## Installation
 
 1. Clone the repository and its submodules:
 
-    ```
+    ```bash
     git clone https://github.gsissc.myatos.net/GLB-BDS-AILAB-CV/synset-poc-llm_data_augmentation.git
     cd synset-poc-llm_data_augmentation
     ```
@@ -42,11 +42,11 @@ This repository provides a proof of concept for semantic augmentation of synthet
 
 3. Build Docker services:
 
-    ```
+    ```bash
     docker compose up
     ```
 
-<h3>Important services</h3>
+## Important services
 
 1. controlnet_sdxl: This service contains all the training & evaluation scripts for Controlnet-SDXL using FMLE experiments. The script [launch.sh](../src/controlnet_sdxl/launch.sh) starts the training of controlnet using previous checkpoints and a given dataset, it can be used to launch to the experiment on FMLE. the script will automatically create the output folders using the name given as argument.
 
@@ -61,10 +61,11 @@ This repository provides a proof of concept for semantic augmentation of synthet
     export UNET_DIR="None"
     ```
 
-    The script [infer.sh](../src/controlnet_sdxl/infer.sh) transforms a synthetic dataset to the real domain using the given checkpoints and save it. Need to modify the checkpoints names for controlnet and unet to be used during the inference. 
+    The script [infer.sh](../src/controlnet_sdxl/infer.sh) transforms a synthetic dataset to the real domain using the given checkpoints and save it. Need to modify the checkpoints names for controlnet and unet to be used during the inference.
 
-2. model_eval: This service encapsulates the evaluation methods by qualitative methods such as CLIP embeddings or quantitative methods by training an independent segmenter on the generated data and testing it on real images to measure the domain shift gap. The script [launch.sh](../src/model_eval/launch.sh) trains a DeepLabv3 segmentation model on a given dataset, test it on a real dataset and save the checkpoints and performances details. 
-    ```
+2. model_eval: This service encapsulates the evaluation methods by qualitative methods such as CLIP embeddings or quantitative methods by training an independent segmenter on the generated data and testing it on real images to measure the domain shift gap. The script [launch.sh](../src/model_eval/launch.sh) trains a DeepLabv3 segmentation model on a given dataset, test it on a real dataset and save the checkpoints and performances details.
+
+    ```env
     # Specify the training dataset (typically generated images dataset)
     export TRAIN_DATA_DIR=
     # Specify the test dataset (typically real world images)
@@ -74,8 +75,7 @@ This repository provides a proof of concept for semantic augmentation of synthet
     export EXP_OUT_FOLDER=
     ```
 
-
-<h3>Some Results</h3>
+## Some Results
 
 Here’s an example of our model's output from a synthetic input image with various instructions provided in the text prompt. The model successfully enhances the realism of synthetic images while adhering to prompt instructions, such as specific car colors, and preserving the semantic integrity of each object from the original image.
 

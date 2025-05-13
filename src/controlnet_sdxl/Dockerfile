@@ -4,14 +4,11 @@ FROM ${REGISTRY}/pytorch/pytorch:2.3.0-cuda11.8-cudnn8-runtime
 
 ARG https_proxy
 ARG http_proxy
-ARG SERVICE_ACC_NAME
-ARG SERVICE_ACC_UID
 ARG GROUP_NAME
 ARG GROUP_ID
 ARG SRC_PATH
-ARG NEWUSERS_FILE_PATH
-ARG MY_USER_ID
-ARG MY_ACC_NAME
+ARG USER_ID
+ARG USER_NAME
 
 # ENV DEBIAN_FRONTEND=noninteractive
 
@@ -27,11 +24,9 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Add all users from cvlab
-# COPY "${NEWUSERS_FILE_PATH}" /new_users.txt
+# Add user to image
 RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" && \
-    useradd -m -u "${MY_USER_ID}" -l "${MY_ACC_NAME}" -G "${GROUP_NAME}" && \
-    useradd -m -u "${SERVICE_ACC_UID}" -l "${SERVICE_ACC_NAME}" -G "${GROUP_NAME}"
+    useradd -m -u "${USER_ID}" -l "${USER_NAME}" -G "${GROUP_NAME}" &&
 
 # Copy working dir to clone the git repo inside
 COPY ./diffusers /diffusers
@@ -48,7 +43,7 @@ RUN pip --no-cache-dir install --upgrade pip\
     && pip install opencv-python pycocotools matplotlib onnxruntime onnx 
 
 # Copy source code
-USER "${SERVICE_ACC_NAME}":"${GROUP_NAME}"
-COPY --chown="${SERVICE_ACC_NAME}":"${GROUP_NAME}" ./* /sdxl/
+USER "${USER_NAME}":"${GROUP_NAME}"
+COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./* /sdxl/
 
 ENTRYPOINT ["bash"]

@@ -16,7 +16,7 @@ env:
 jobs:
   build:
     name: 🏗️ Build the image
-    runs-on: [cvlab-ci]
+    runs-on: [ubuntu]
     env:
       # Use the mirror with http (registry in the "FROM" instruction)
       SNAPSHOT_REGISTRY: ${{ vars.SF2_REGISTRY_URL }}/${{ vars.SF2_DOCKER_SNAPSHOT }}
@@ -26,12 +26,11 @@ jobs:
       - name: 📁 Checkout
         uses: actions/checkout@v3
 
-      # 🚨 IF YOU NEED TO CHANGE THE IMAGE NAME, PLEASE UPDATE THIS STEP
-      - name: 🎫 Get image name from repo name
+      - name: 🎫 Get image name
         id: get-image-name
-        uses: GLB-BDS-AILAB-CV/tools-shared_workflows/.github/actions/get-name@v0.3
-        with:
-          snapshot-registry: ${{ env.SNAPSHOT_REGISTRY }}
+        run: |
+          echo "name=${{ vars.IMAGE_NAME }}" >> $GITHUB_OUTPUT
+          echo "snapshot-name=${{ env.SNAPSHOT_REGISTRY }}/${{ vars.IMAGE_NAME }}" >> $GITHUB_OUTPUT
 
       # We need to login first to access artifactory at build time
       - name: 🔐 Login to Artifactory
@@ -41,26 +40,19 @@ jobs:
           username: ${{ secrets.GLB_BDS_SF2_JFROG_USERNAME }}
           password: ${{ secrets.GLB_BDS_SF2_JFROG_PWD }}
 
-      - name: 🎫 Get a file with all users to add
-        run: printf "${{ secrets.NEWUSERS_CVLAB }}" > "${{ env.NEWUSERS_FILE_PATH }}"
-      - name: 🎫 Get a file with all users to add (verification)
-        run: cat ${{ env.NEWUSERS_FILE_PATH }}
-
       - name: 🏗️ Build the image
         id: build
         env:
           # Variables needed in docker compose
           HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
           HTTPS_PROXY: ${{ secrets.HTTP_PROXY }}
-          GROUP_ID: ${{ vars.SERVICE_ACC_GROUP_ID }}
-          GROUP_NAME: ${{ vars.SERVICE_ACC_GROUP_NAME }}
-          SERVICE_ACC_UID: ${{ vars.SERVICE_ACC_UID }}
-          SERVICE_ACC_NAME: ${{ vars.SERVICE_ACC_NAME }}
+          GROUP_ID: ${{ vars.DEFAULT_GROUP_ID }}
+          GROUP_NAME: ${{ vars.DEFAULT_GROUP_NAME }}
           LOW_SHM: ${{ secrets.LOW_SHM }}
           HIGH_SHM: ${{ secrets.HIGH_SHM }}
           SRC_PATH: ${{ secrets.SRC_PATH }}
-          MY_USER_ID: ${{ secrets.MY_USER_ID }}
-          MY_ACC_NAME: ${{ secrets.MY_ACC_NAME }}
+          USER_ID: ${{ secrets.DEFAULT_USER_ID }}
+          USER_NAME: ${{ secrets.DEFAULT_ACC_NAME }}
           NEWUSERS_FILE_PATH: ./src/controlnet_sdxl/new_users.txt
 
           # 🚨 IF YOU NEED MORE ENVIRONMENT VARIABLES AT BUILD, PLEASE ADD THEM HERE

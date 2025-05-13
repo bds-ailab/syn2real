@@ -1,10 +1,209 @@
 name: 🧪 Verify pull request
-run-name: "🧪 Gab is verifying PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}"
+run-name: '🧪 Gab is verifying PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}'
+
+# Based on https://github.gsissc.myatos.net/GLB-BDS-AILAB-CV/tools-shared_workflows/blob/main/.github/workflows/lint-pr.yml v1.5.0
 
 on:
   - pull_request
 
 jobs:
   changes:
-    name: 💅 Lint the PR
-    uses: GLB-BDS-AILAB-CV/tools-shared_workflows/.github/workflows/lint-pr.yml@v0.5.2
+    name: 📁 Verify files that changed
+    runs-on: [ubuntu]
+    # Required permissions
+    permissions:
+      pull-requests: read
+    # Set job outputs to values from filter step
+    outputs:
+      docker: ${{ steps.filter.outputs.docker }}
+      docker_files: ${{ steps.filter.outputs.docker_files }}
+      python: ${{ steps.filter.outputs.python }}
+      python_files: ${{ steps.filter.outputs.python_files }}
+      shell: ${{ steps.filter.outputs.shell }}
+      shell_files: ${{ steps.filter.outputs.shell_files }}
+    steps:
+      # For pull requests it's not necessary to checkout the code
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          list-files: json
+          filters: |
+            docker:
+              - added|modified: '**/Dockerfile'
+              - added|modified: 'Dockerfile'
+              - added|modified: '**/dockerfile'
+              - added|modified: 'dockerfile'
+            python:
+              - added|modified: '**/*.py'
+              - added|modified: '*.py'
+              - added|modified: '**/*.ipynb'
+              - added|modified: '*.ipynb'
+            shell:
+              - added|modified: '**/*.sh'
+              - added|modified: '*.sh'
+              - added|modified: '**/*.bash'
+              - added|modified: '*.bash'
+
+  lint-python:
+    needs: changes
+    if: ${{ always() && needs.changes.outputs.python == 'true' }}
+    runs-on: [ubuntu]
+    name: 🐍 Lint python and jupyter
+    outputs:
+      failure: ${{ steps.black.outcome == 'failure' }}
+    steps:
+      - name: 📂 Checkout
+        uses: actions/checkout@v3
+
+      - name: 🧽 Run black
+        id: black
+        uses: psf/black@stable
+        with:
+          jupyter: true
+          src: ${{ join(fromJSON(needs.changes.outputs.python_files), ' ') }}
+          version: '~= 24.2.0'
+        continue-on-error: true
+
+      - name: 🔗 Get logs url
+        if: ${{ steps.black.outcome == 'failure' }}
+        id: get-url
+        shell: bash
+        run: |
+          echo url=$(curl -s -H "Authorization: Bearer  ${{ secrets.GITHUB_TOKEN }}" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs" |\
+            jq -r ".jobs[] | select(.name | contains(\"🐍 Lint python and jupyter\")) | .html_url"
+          ) >> $GITHUB_OUTPUT
+
+      - name: 💬 Add comment to PR
+        uses: .github/actions/create-or-update-comment
+        if: ${{ steps.black.outcome == 'failure' }}
+        with:
+          body: |
+            ### ⚫ Black formatter
+
+            🛑 **[Please check the logs](${{ steps.get-url.outputs.url }}#step:3:1)**
+
+            Black states that some python and/or jupyter files need to be formatted
+
+          search-string: '### ⚫ Black formatter'
+
+      - name: 💬 Add comment to PR
+        uses: .github/actions/create-or-update-comment
+        if: ${{ steps.black.outcome != 'failure' }}
+        with:
+          body: |
+            ### ⚫ Black formatter
+
+            ✅ Your python and/or jupyter files are well formatted
+
+          search-string: '### ⚫ Black formatter'
+
+      - name: ❌ Fail the job
+        if: ${{ steps.black.outcome == 'failure' }}
+        run: exit 1
+
+  lint-docker:
+    needs: changes
+    if: ${{ always() && needs.changes.outputs.docker == 'true' }}
+    runs-on: [ubuntu]
+    name: 🐳 Lint ${{ matrix.dockerfile }}
+    outputs:
+      failure: ${{ steps.hadolint == 'failure' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile: ${{ fromJSON(needs.changes.outputs.docker_files) }}
+
+    steps:
+      - name: 📂 Checkout
+        uses: actions/checkout@v3
+
+      - name: 🧽 Run Hadolint
+        id: hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ${{ matrix.dockerfile }}
+          ignore: DL3008 # We don't fix apt packages versions, it's done at distro level
+
+        continue-on-error: true
+
+      - name: 💬 Add comment to PR
+        uses: .github/actions/create-or-update-comment
+        if: ${{ steps.hadolint.outcome == 'failure' }}
+        with:
+          body: |
+            ### 🐳 Hadolint `${{ matrix.dockerfile }}`
+
+            🛑 Your Dockerfile `${{ matrix.dockerfile }}` needs changes:
+
+            ```bash
+            ${{ env.HADOLINT_RESULTS }}
+            ```
+
+          search-string: '### 🐳 Hadolint `${{ matrix.dockerfile }}`'
+
+      - name: 💬 Add comment to PR
+        uses: .github/actions/create-or-update-comment
+        if: ${{ steps.hadolint.outcome != 'failure' }}
+        with:
+          body: |
+            ### 🐳 Hadolint `${{ matrix.dockerfile }}`
+
+            ✅ Your Dockerfile `${{ matrix.dockerfile }}` is well formatted
+
+          search-string: '### 🐳 Hadolint `${{ matrix.dockerfile }}`'
+
+      - name: ❌ Fail the job
+        if: ${{ steps.hadolint.outcome == 'failure' }}
+        run: exit 1
+
+  lint-shell:
+    needs: changes
+    if: ${{ always() && needs.changes.outputs.shell == 'true' }}
+    runs-on: [ubuntu]
+    name: 🐚 Lint shell scripts
+    outputs:
+      failure: ${{ steps.shellcheck.outcome == 'failure' }}
+    steps:
+      - name: 📂 Checkout
+        uses: actions/checkout@v3
+
+      - name: 🐚 Lint shell
+        uses: reviewdog/action-shellcheck@v1
+        id: shellcheck
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          pattern: |
+            *.bash
+            *.sh
+          exclude: |
+            */.git/*
+            ./.cache/*
+          fail_on_error: true
+
+  pr-ready-to-merge:
+    needs:
+      - lint-python
+      - lint-docker
+      - lint-shell
+      - changes
+    if: ${{ always() }}
+    runs-on: [ubuntu]
+    name: 🔍 Verify PR is ready to merge
+    steps:
+      - name: 'Verify: 📁 Verify files that changed'
+        if: ${{ contains(needs.changes.result, 'failure') }}
+        run: exit 1
+
+      - name: 'Verify: 🐍 Lint Python'
+        if: ${{ needs.lint-python.outputs.failure == 'true' }}
+        run: exit 1
+
+      - name: 'Verify: 🐳 Lint Docker'
+        if: ${{ needs.lint-docker.outputs.failure == 'true' }}
+        run: exit 1
+
+      - name: 'Verify: 🐚 Lint Shell scripts'
+        if: ${{ needs.lint-shell.outputs.failure == 'true' }}
+        run: exit 1

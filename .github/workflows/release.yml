@@ -9,11 +9,48 @@ on:
 jobs:
   release:
     name: 📦 Release the image
-    uses: GLB-BDS-AILAB-CV/tools-shared_workflows/.github/workflows/release-docker.yml@v0.4
-    with:
-      registry: ${{ vars.SF2_REGISTRY_URL }}
-      snapshot_folder: ${{ vars.SF2_DOCKER_SNAPSHOT }}
-      release_folder: ${{ vars.SF2_DOCKER_RELEASE }}
-    secrets:
-      REGISTRY_USERNAME: ${{ secrets.GLB_BDS_SF2_JFROG_USERNAME }}
-      REGISTRY_PWD: ${{ secrets.GLB_BDS_SF2_JFROG_PWD }}
+    environment: release
+    runs-on: [ubuntu]
+    steps:
+      - name: 📁 Checkout
+        uses: actions/checkout@v3
+
+      - name: 🎫 Get base image name from input
+        id: get-image-name
+        run: |
+          echo "name=${{ vars.IMAGE_NAME }}" >> $GITHUB_OUTPUT
+          echo "snapshot-name=${{ vars.SF2_REGISTRY_URL }}/${{ vars.SF2_DOCKER_SNAPSHOT }}/${{ vars.IMAGE_NAME }}" >> $GITHUB_OUTPUT
+          echo "release-name=${{ vars.SF2_REGISTRY_URL }}/${{ vars.SF2_DOCKER_RELEASE }}/${{ vars.IMAGE_NAME }}" >> $GITHUB_OUTPUT
+
+      - name: 🔐 Login to Artifactory
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ vars.SF2_REGISTRY_URL }}
+          username: ${{ secrets.GLB_BDS_SF2_JFROG_USERNAME }}
+          password: ${{ secrets.GLB_BDS_SF2_JFROG_PWD }}
+
+      - name: 📥 Pull from snapshot
+        run: docker pull ${{ steps.get-image-name.outputs.snapshot-name }}:${{ github.ref_name }}
+
+      - name: 🎫 Rename as release
+        run: |
+          docker tag \
+          ${{ steps.get-image-name.outputs.snapshot-name }}:${{ github.ref_name }} \
+          ${{ steps.get-image-name.outputs.release-name }}:${{ github.ref_name }}
+
+      - name: 📤 Push to release
+        run: docker push ${{ steps.get-image-name.outputs.release-name }}:${{ github.ref_name }}
+
+      - name: 🎫 Rename as latest
+        run: |
+          docker tag \
+          ${{ steps.get-image-name.outputs.snapshot-name }}:${{ github.ref_name }} \
+          ${{ steps.get-image-name.outputs.release-name }}:latest
+
+      - name: 📤 Override latset on release registry
+        run: docker push ${{ steps.get-image-name.outputs.release-name }}:latest
+
+      - name: 📜 Summary
+        run: |
+          echo "### \`${{ steps.get-image-name.outputs.name }}\` built and published" >> "$GITHUB_STEP_SUMMARY"
+          echo "To use it you can run: \`docker pull ${{ steps.get-image-name.outputs.release-name }}:${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
