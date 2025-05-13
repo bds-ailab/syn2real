@@ -16,7 +16,7 @@ env:
 jobs:
   build:
     name: 🏗️ Build the image
-    runs-on: [cvlab-ci]
+    runs-on: [ubuntu]
     env:
       # Use the mirror with http (registry in the "FROM" instruction)
       SNAPSHOT_REGISTRY: ${{ vars.SF2_REGISTRY_URL }}/${{ vars.SF2_DOCKER_SNAPSHOT }}
