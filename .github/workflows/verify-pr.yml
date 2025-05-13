@@ -191,8 +191,6 @@ jobs:
           fail_on_error: true
 
   sonar:
-    needs: changes
-    if: ${{ always() && needs.changes.outputs.shell == 'true' }}
     runs-on: ubuntu-latest
     name: ☢️ Run Sonar analysis
     outputs:
