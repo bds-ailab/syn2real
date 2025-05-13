@@ -6,7 +6,7 @@ This repository provides a proof of concept for semantic augmentation of synthet
 
 ## Detailed documentation links
 
-- State of the art study: [CV:Data:Synset:Syn2Real:State of the art-BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Real+%3A%3Ad+State+of+the+art)
+- State of the art study: [CV:Data:Synset:Syn2Real:State of the art-BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Real+%3A%3A+State+of+the+art)
 
 - General strategy: [CV:Data:Synset:Syn2Real:General Approach-BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Reald+%3A%3A+General+approach)
 
