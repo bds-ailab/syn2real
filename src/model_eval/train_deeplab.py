@@ -478,7 +478,7 @@ def train_model(
 
             if not (step % eval_steps):
                 eval_loss, eval_miou, results = eval_model(
-                    model, dataloaders, metric, criterion, id2label, batch_size
+                    model, dataloaders, metric, criterion, id2label
                 )
                 log_loss(exp_folder, epoch, step, eval_loss, eval_miou, "Test")
                 log_IoU(exp_folder, step, results)
