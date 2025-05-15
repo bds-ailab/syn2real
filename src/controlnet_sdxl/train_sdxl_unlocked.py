@@ -83,9 +83,9 @@ def main(args):
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
-        level=logging.INFO,
+        level=logging.DEBUG,
     )
-    logger.info(accelerator.state, main_process_only=False)
+    logger.debug(accelerator.state, main_process_only=False)
     if accelerator.is_local_main_process:
         transformers.utils.logging.set_verbosity_warning()
         diffusers.utils.logging.set_verbosity_info()
@@ -175,10 +175,10 @@ def main(args):
         )
 
     if args.controlnet_model_name_or_path != "None":
-        logger.info("Loading existing controlnet weights")
+        logger.debug("Loading existing controlnet weights")
         controlnet = ControlNetModel.from_pretrained(args.controlnet_model_name_or_path)
     else:
-        logger.info("Initializing controlnet weights from unet")
+        logger.debug("Initializing controlnet weights from unet")
         controlnet = ControlNetModel.from_unet(unet)
 
     def unwrap_model(model):
@@ -238,7 +238,7 @@ def main(args):
 
     if args.enable_npu_flash_attention:
         if is_torch_npu_available():
-            logger.info("npu flash attention enabled.")
+            logger.debug("npu flash attention enabled.")
             unet.enable_npu_flash_attention()
         else:
             raise ValueError(
@@ -483,16 +483,16 @@ def main(args):
         * args.gradient_accumulation_steps
     )
 
-    logger.info("***** Running training *****")
-    logger.info(f"  Num examples = {len(train_dataset)}")
-    logger.info(f"  Num batches each epoch = {len(train_dataloader)}")
-    logger.info(f"  Num Epochs = {args.num_train_epochs}")
-    logger.info(f"  Instantaneous batch size per device = {args.train_batch_size}")
-    logger.info(
+    logger.debug("***** Running training *****")
+    logger.debug(f"  Num examples = {len(train_dataset)}")
+    logger.debug(f"  Num batches each epoch = {len(train_dataloader)}")
+    logger.debug(f"  Num Epochs = {args.num_train_epochs}")
+    logger.debug(f"  Instantaneous batch size per device = {args.train_batch_size}")
+    logger.debug(
         f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}"
     )
-    logger.info(f"  Gradient Accumulation steps = {args.gradient_accumulation_steps}")
-    logger.info(f"  Total optimization steps = {args.max_train_steps}")
+    logger.debug(f"  Gradient Accumulation steps = {args.gradient_accumulation_steps}")
+    logger.debug(f"  Total optimization steps = {args.max_train_steps}")
     global_step = 0
     first_epoch = 0
 
@@ -638,10 +638,10 @@ def main(args):
                                 )
                                 removing_checkpoints = checkpoints[0:num_to_remove]
 
-                                logger.info(
+                                logger.debug(
                                     f"{len(checkpoints)} checkpoints already exist, removing {len(removing_checkpoints)} checkpoints"
                                 )
-                                logger.info(
+                                logger.debug(
                                     f"removing checkpoints: {', '.join(removing_checkpoints)}"
                                 )
 
@@ -656,7 +656,7 @@ def main(args):
                         )
                         # accelerator.save_state(save_path)
                         unwrap_model(unet).save_pretrained(save_path)
-                        logger.info(f"Saved state to {save_path}")
+                        logger.debug(f"Saved state to {save_path}")
 
                     if (
                         args.validation_prompt is not None
