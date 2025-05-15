@@ -11,6 +11,7 @@ Always write a clear log message for your commits. One-line messages are fine fo
     > 
     > A paragraph describing what changed and its impact."
 
+
 ## Testing
 
 Please write unit tests for new code you create, with specifications matching the tests. 
@@ -23,6 +24,38 @@ Remember that:
 - unit MUST/SHOULD/CAN assertion
 
 Useful link: [Pytest](https://docs.pytest.org/en/8.0.x/)
+
+
+
+## Branch Naming Convention
+
+Every **dev branch** should follow this convention
+
+Feature (anything improving develop branch):
+```
+feature/<Jira-ticket-ID>-<name_of_the_feature>
+```
+
+Fix (fix a bug or a regression in a release):
+```
+fix/target-branch/<Jira-ticket-ID>-<name_of_the_fix>
+```
+Chore (update documentation, comments, tests, dependencies):
+```
+chore/target-branch/<Jira-ticket-ID>-<name_of_the_chore>
+```
+
+Test (a branch to test and experiment something):
+```
+test/target-branch/<Jira-ticket-ID>-<name_of_the_test>
+```
+
+The **main branches** have reserved name: develop, 11.13, 11.12,…
+
+Make sure you **don’t use capitals** in the names where not needed (Fix/… and fix/… would create 2 different branches)
+
+Use **underscores in the name** of the feature/fix/chore
+
 
 ## Coding Conventions
 
@@ -81,18 +114,18 @@ class MyClass:
 		"""
 		Some Method that surely does nothing useful ! But take
 		a look at this docstring, made with Google Python style
-	    https://google.github.io/styleguide/pyguide.html#doc-function-args 
+	    	https://google.github.io/styleguide/pyguide.html#doc-function-args 
 		
 		Args:
-			value (int): A dummy integer value
-            message(str): A dummy string width "Message" as default 
-				value. Docstring is indented because it took more 
-				than one line to describe this argument
+			value (int):  A dummy integer value
+            		message(str): A dummy string width "Message" as default 
+                                      value. Docstring is indented because it took more 
+				      than one line to describe this argument
 
 		Returns:
 			A string containing the message and the value			 
 		"""
-		return f"{def_string} {value}"
+		return f"{message} {value}"
 
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ #
 # Guideline: Docstring should use the Google style format #
@@ -106,5 +139,6 @@ class MyClass:
 
 ## Asking a question
 
- Ask any question about how to use Syn2Real by mail to anais.druart@eviden.com.
+Please open a GitHub Issue so that the discussion remains public and can benefit everyone.
+Ask any other question about how to use Syn2Real by mail to anais.druart@eviden.com.
 
