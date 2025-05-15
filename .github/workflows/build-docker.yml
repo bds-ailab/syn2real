@@ -5,9 +5,6 @@ on:
   release:
     types:
       - prereleased
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 env:
@@ -16,7 +13,7 @@ env:
 jobs:
   build:
     name: 🏗️ Build the image
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     env:
       # Use the mirror with http (registry in the "FROM" instruction)
       SNAPSHOT_REGISTRY: ${{ vars.SF2_REGISTRY_URL }}/${{ vars.SF2_DOCKER_SNAPSHOT }}
@@ -78,9 +75,6 @@ jobs:
           IMAGE_NAME_GAN: ${{ steps.get-image-name.outputs.snapshot-name }}/gan
           IMAGE_TAG_GAN: ${{ env.IMAGE_TAG }}
           IMAGE_NAME: ${{ steps.get-image-name.outputs.snapshot-name }}
-
-          # Use legacy builder
-          DOCKER_BUILDKIT: '0'
 
         # With no-cache because of pip dependencies
         run: docker compose build
