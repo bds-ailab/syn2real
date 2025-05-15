@@ -659,6 +659,7 @@ def main(args):
                             accelerator=accelerator,
                             weight_dtype=weight_dtype,
                             step=global_step,
+                            logger=logger,
                         )
 
             logs = {"loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0]}
