@@ -1,15 +1,24 @@
-name: 🧪 Verify pull request
-run-name: '🧪 Gab is verifying PR #${{ github.event.pull_request.number }}: ${{ github.event.pull_request.title }}'
+name: 🧪 Run tests and linter
+run-name: >-
+  ${{ github.event_name == 'pull_request' &&
+    format('🧪 Gab is verifying PR #{0} : {1}', github.event.pull_request.number, github.event.pull_request.title)
+  ||
+    format('🧪 Gab is verifying {0}', github.ref_name)
+  }}
 
 # Based on https://github.gsissc.myatos.net/GLB-BDS-AILAB-CV/tools-shared_workflows/blob/main/.github/workflows/lint-pr.yml v1.5.0
 
 on:
-  - pull_request
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   changes:
+    if: github.event_name == 'pull_request'
     name: 📁 Verify files that changed
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     # Required permissions
     permissions:
       pull-requests: read
@@ -47,7 +56,7 @@ jobs:
   lint-python:
     needs: changes
     if: ${{ always() && needs.changes.outputs.python == 'true' }}
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     name: 🐍 Lint python and jupyter
     outputs:
       failure: ${{ steps.black.outcome == 'failure' }}
@@ -61,7 +70,6 @@ jobs:
         with:
           jupyter: true
           src: ${{ join(fromJSON(needs.changes.outputs.python_files), ' ') }}
-          version: '~= 24.2.0'
         continue-on-error: true
 
       - name: 🔗 Get logs url
@@ -75,7 +83,7 @@ jobs:
           ) >> $GITHUB_OUTPUT
 
       - name: 💬 Add comment to PR
-        uses: .github/actions/create-or-update-comment
+        uses: ./.github/actions/create-or-update-comment
         if: ${{ steps.black.outcome == 'failure' }}
         with:
           body: |
@@ -88,7 +96,7 @@ jobs:
           search-string: '### ⚫ Black formatter'
 
       - name: 💬 Add comment to PR
-        uses: .github/actions/create-or-update-comment
+        uses: ./.github/actions/create-or-update-comment
         if: ${{ steps.black.outcome != 'failure' }}
         with:
           body: |
@@ -105,7 +113,7 @@ jobs:
   lint-docker:
     needs: changes
     if: ${{ always() && needs.changes.outputs.docker == 'true' }}
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     name: 🐳 Lint ${{ matrix.dockerfile }}
     outputs:
       failure: ${{ steps.hadolint == 'failure' }}
@@ -128,7 +136,7 @@ jobs:
         continue-on-error: true
 
       - name: 💬 Add comment to PR
-        uses: .github/actions/create-or-update-comment
+        uses: ./.github/actions/create-or-update-comment
         if: ${{ steps.hadolint.outcome == 'failure' }}
         with:
           body: |
@@ -143,7 +151,7 @@ jobs:
           search-string: '### 🐳 Hadolint `${{ matrix.dockerfile }}`'
 
       - name: 💬 Add comment to PR
-        uses: .github/actions/create-or-update-comment
+        uses: ./.github/actions/create-or-update-comment
         if: ${{ steps.hadolint.outcome != 'failure' }}
         with:
           body: |
@@ -160,7 +168,7 @@ jobs:
   lint-shell:
     needs: changes
     if: ${{ always() && needs.changes.outputs.shell == 'true' }}
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     name: 🐚 Lint shell scripts
     outputs:
       failure: ${{ steps.shellcheck.outcome == 'failure' }}
@@ -182,6 +190,32 @@ jobs:
             ./.cache/*
           fail_on_error: true
 
+  sonar:
+    runs-on: ubuntu-latest
+    name: ☢️ Run Sonar analysis
+    outputs:
+      failure: ${{ steps.sonar.outcome == 'failure' }}
+    steps:
+      - name: 📂 Checkout
+        uses: actions/checkout@v3
+
+      - name: ☢️ Sonar analysis
+        id: sonar
+        uses: sonarsource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: https://${{ secrets.SONARQUBE_HOST }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ github.repository_owner }}:${{ github.event.repository.name }}
+            -Dsonar.projectName=${{ github.repository_owner }}:${{ github.event.repository.name }}
+            -Dsonar.links.homepage=${{ github.server_url }}/${{ github.repository }}
+            -Dsonar.links.ci=${{ github.server_url }}/${{ github.repository }}/actions/
+            -Dsonar.links.scm=${{ github.server_url }}/${{ github.repository }}
+            -Dsonar.python.xunit.reportPath=reports/${{ needs.testing.outputs.junit }}
+            -Dsonar.python.coverage.reportPaths=reports/${{ needs.testing.outputs.coverage }}
+            -Dsonar.qualitygate.wait=true
+
   pr-ready-to-merge:
     needs:
       - lint-python
@@ -189,7 +223,7 @@ jobs:
       - lint-shell
       - changes
     if: ${{ always() }}
-    runs-on: [ubuntu]
+    runs-on: ubuntu-latest
     name: 🔍 Verify PR is ready to merge
     steps:
       - name: 'Verify: 📁 Verify files that changed'
@@ -206,4 +240,8 @@ jobs:
 
       - name: 'Verify: 🐚 Lint Shell scripts'
         if: ${{ needs.lint-shell.outputs.failure == 'true' }}
+        run: exit 1
+
+      - name: 'Verify: ☢️ Run Sonar analysis'
+        if: ${{ needs.sonar.outputs.failure == 'true' }}
         run: exit 1
