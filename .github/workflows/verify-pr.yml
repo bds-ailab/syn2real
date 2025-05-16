@@ -214,6 +214,8 @@ jobs:
             -Dsonar.links.scm=${{ github.server_url }}/${{ github.repository }}
             -Dsonar.python.xunit.reportPath=reports/${{ needs.testing.outputs.junit }}
             -Dsonar.python.coverage.reportPaths=reports/${{ needs.testing.outputs.coverage }}
+            -Dsonar.tests=.
+            -Dsonar.test.inclusions=**/tests/**/*.py
             -Dsonar.qualitygate.wait=true
 
   pr-ready-to-merge:
