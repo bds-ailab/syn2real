@@ -18,27 +18,27 @@ class TestModelLoad:
 
     @it("must return an nn.Module object named ResNet")
     @skip
-    def test_model_type():
+    def test_model_type(self):
         pass
 
     @it("must create a model with NUM_CLASSES neurone in the last fc layer")
     @skip
-    def test_model_fclayer():
+    def test_model_fclayer(self):
         pass
 
     @it("must have all model's parameters trainable")
     @skip
-    def test_model_trainable():
+    def test_model_trainable(self):
         pass
 
     @it("must return an output tensor with size (BATCH_SIZE, NUM_CLASSES)")
     @skip
-    def test_model_output_shape():
+    def test_model_output_shape(self):
         pass
 
     @it("must return this output {} for this input tensor {}")
     @skip
-    def test_model_expected_output():
+    def test_model_expected_output(self):
         pass
 
 
@@ -47,19 +47,19 @@ class TestModelTrain:
 
     @it("must always have a loss != 0")
     @skip
-    def test_train_loss():
+    def test_train_loss(self):
         pass
 
     @it(
         "must update (change) the parameters after each step : params_i != params_(i+1)"
     )
     @skip
-    def test_train_step():
+    def test_train_step(self):
         pass
 
     @it("must converge in terms of training loss : loss_i < 2*loss_0 ")
     @skip
-    def test_train_convergence():
+    def test_train_convergence(self):
         pass
 
 
@@ -68,5 +68,5 @@ class TestModelEval:
 
     @it("must return the following predictions {} for this mock model and dataloader")
     @skip
-    def test_model_inference():
+    def test_model_inference(self):
         pass
