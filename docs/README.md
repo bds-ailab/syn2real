@@ -8,7 +8,7 @@ This repository provides a proof of concept for semantic augmentation of synthet
 
 - State of the art study: [SOTA](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/SOTA.md)
 
-- General strategy: [CV:Data:Synset:Syn2Real:General Approach-BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3A+Syn2Reald+%3A%3A+General+approach)
+- General strategy: [General Approach](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/general_approach.md)
 
 - Training experiments and results: [CV:Data:Synset:Syn2Real:Controlnet training -BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/pagesd/viewpage.action?pageId=618758247)
 
