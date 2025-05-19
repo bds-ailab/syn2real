@@ -12,7 +12,7 @@ This repository provides a proof of concept for semantic augmentation of synthet
 
 - Training experiments and results: [CV:Data:Synset:Syn2Real:Controlnet training -BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/pagesd/viewpage.action?pageId=618758247)
 
-- Computation acceleration methods: [CV:Data:Synset:Syn2Real:Acceleration-BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/display/BREBD/CV+%3A%3A+Data+%3A%3A+Synset+%3A%3Ad+Syn2Real+%3A%3A+Acceleration)
+- Computation acceleration methods: [Acceleration](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/acceleration.md)
 
 ## Installation
 
