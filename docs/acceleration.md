@@ -88,7 +88,7 @@ To prevent underflow (values too small for representation in FP16) during backpr
 
 Incorporating these two features is straightforward, akin to earlier additions, as PyTorch already includes a scaler object and a context manager function for mixed precision.
 
-```
+```python
 from torch.cuda.amp import GradScaler, autocast
 
 # Init Gradient scaler
