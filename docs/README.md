@@ -1,10 +1,14 @@
 # LLMs for data semantic augmentation
 
-## Description
-
+## ✍️ Description
+<br>
 This repository provides a proof of concept for semantic augmentation of synthetic images using diffusion models. Each pipeline component is encapsulated in a Docker container, and all containers (services) are managed through a Docker Compose file.
+<br>
 
-## Detailed documentation links
+## 📄 Detailed documentation links
+<br>
+
+Here are some useful links describing the project:
 
 - State of the art study: [SOTA](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/SOTA.md)
 
@@ -14,7 +18,9 @@ This repository provides a proof of concept for semantic augmentation of synthet
 
 - Computation acceleration methods: [Acceleration](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/acceleration.md)
 
-## Installation
+  
+## ⚙️ Installation
+<br>
 
 1. Clone the repository and its submodules:
 
@@ -46,9 +52,10 @@ This repository provides a proof of concept for semantic augmentation of synthet
     docker compose up
     ```
 
-## Important services
+## 🎯 Important services
+<br>
 
-1. controlnet_sdxl: This service contains all the training & evaluation scripts for Controlnet-SDXL using FMLE experiments. The script [launch.sh](../src/controlnet_sdxl/launch.sh) starts the training of controlnet using previous checkpoints and a given dataset, it can be used to launch to the experiment on FMLE. the script will automatically create the output folders using the name given as argument.
+1. **controlnet_sdxl**: This service contains all the training & evaluation scripts for Controlnet-SDXL using FMLE experiments. The script [launch.sh](../src/controlnet_sdxl/launch.sh) starts the training of controlnet using previous checkpoints and a given dataset, it can be used to launch to the experiment on FMLE. the script will automatically create the output folders using the name given as argument.
 
     ```
     # Complete the output path of the checkpoints
@@ -63,7 +70,7 @@ This repository provides a proof of concept for semantic augmentation of synthet
 
     The script [infer.sh](../src/controlnet_sdxl/infer.sh) transforms a synthetic dataset to the real domain using the given checkpoints and save it. Need to modify the checkpoints names for controlnet and unet to be used during the inference.
 
-2. model_eval: This service encapsulates the evaluation methods by qualitative methods such as CLIP embeddings or quantitative methods by training an independent segmenter on the generated data and testing it on real images to measure the domain shift gap. The script [launch.sh](../src/model_eval/launch.sh) trains a DeepLabv3 segmentation model on a given dataset, test it on a real dataset and save the checkpoints and performances details.
+2. **model_eval**: This service encapsulates the evaluation methods by qualitative methods such as CLIP embeddings or quantitative methods by training an independent segmenter on the generated data and testing it on real images to measure the domain shift gap. The script [launch.sh](../src/model_eval/launch.sh) trains a DeepLabv3 segmentation model on a given dataset, test it on a real dataset and save the checkpoints and performances details.
 
     ```env
     # Specify the training dataset (typically generated images dataset)
@@ -75,8 +82,8 @@ This repository provides a proof of concept for semantic augmentation of synthet
     export EXP_OUT_FOLDER=
     ```
 
-## Some Results
-
+## 📚 Some Results
+<br>
 Here’s an example of our model's output from a synthetic input image with various instructions provided in the text prompt. The model successfully enhances the realism of synthetic images while adhering to prompt instructions, such as specific car colors, and preserving the semantic integrity of each object from the original image.
 
 ![alt text](img/variation.png)
