@@ -1,6 +1,6 @@
-## Acceleration ##
+## Acceleration
 
-### Training Pipeline ###
+### Training Pipeline
 Typically, the training of deep learning models consists of two main parts:
 
 - Data Loading: This occurs on the CPU, where datasets are shuffled and batched randomly, then loaded onto the computing devices using DataLoaders.
@@ -9,8 +9,8 @@ Typically, the training of deep learning models consists of two main parts:
 During the development phase, computation time and performance are often overlooked. However, when transitioning to production and scaling, acceleration techniques become crucial to make training more feasible, particularly for large models. In this tutorial, I will introduce some straightforward techniques that can be applied in PyTorch (as an example) to boost training performance with minimal code changes (all techniques are fully supported by the PyTorch library).
 ![image](https://github.com/user-attachments/assets/9a4b88ec-20db-4ee0-b544-336b7a66389e)
 
-### Data loading acceleration ###
-#### Workers Number ####
+### Data loading acceleration
+#### Workers Number
 Generally, data loading constitutes a bottleneck in the training pipeline; the larger the batch size and image size, the more challenging it is for a single CPU thread to load data onto the computing device (GPU). As illustrated in the figure below, the data loading time significantly surpasses the computation time for a standard benchmarking model, ResNet50, operating on a single GPU with a batch size of 32.
 
 ![image](https://github.com/user-attachments/assets/41600d4c-1287-45ae-b9aa-15fb885e93aa)
@@ -40,7 +40,7 @@ services:
 
 - **Disk IO bandwidth:** The bandwidth of storage disk IO is a physical limitation that prevents the use of an excessively large number of workers, as each thread requires data to be loaded from the disk. Typically, it is unnecessary to approach this limit.
 
-### Pinned Memory & Non Blocking transfer ###
+### Pinned Memory & Non Blocking transfer
 
 To transfer data to the GPU, it is initially moved from pageable memory to pinned memory on the CPU. Simply put, a worker retrieves the batch from storage disk after shuffling, applies the required preprocessing transformations, and waits for the GPU to finish its computations and be ready for the next batch. Once the GPU is ready, the batch is transferred from the CPU's memory to pinned memory and then to the GPU. This process requires the worker to wait for the GPU to complete its tasks. To streamline this, enabling pin_memory in PyTorch DataLoaders allows data to be directly stored in pinned memory after preprocessing. With the worker now available to retrieve the next batch, activating the non_blocking feature permits the worker to proceed to fetch the next batch while the first one is loaded into pinned memory.
 
@@ -68,7 +68,7 @@ for inputs, labels in dataloader:
 
 **Remark:** In the preceding section, I only outlined some techniques applicable to nearly all data loading processes. Nonetheless, additional technical decisions can optimize this phase, such as selecting a data storage format. Some formats may decode faster but require more storage space. Such decisions should be based on individual circumstances, constraints, and priorities. 
 
-### Gradient Computing & Mixed Precision ###
+### Gradient Computing & Mixed Precision
 
 By default, a model's parameters, activations, and gradients are represented in Float32 format. To reduce memory usage and increase throughput, one might consider a half-precision (Float16) representation. However, this approach presents two challenges:
 
@@ -76,14 +76,14 @@ Firstly, representing the model's weights in FP16 format can lead to precision l
 Secondly, gradients with very small values cannot be represented in FP16.
 To address these issues while still benefiting from FP16, we employ the following techniques:
 
-#### Mixed Precision ####
+#### Mixed Precision
 
 Model weights are maintained in FP32 to preserve accuracy and prevent the precision loss that could occur if weights were stored in FP16. However, most computations during the forward and backward passes are performed in FP16. This significantly accelerates operations due to reduced computational and memory demands. Although some precision is lost in the gradient computations for updating the parameters, this minor loss does not impact overall training. Since gradients are inherently approximate (stochastic gradient descent), the optimizer will adjust for any directional errors in subsequent steps.
 
 ![image](https://github.com/user-attachments/assets/1b8de982-8b16-4ecb-9553-165f667c08ca)
 
 
-#### Loss Scaling ####
+#### Loss Scaling
 To prevent underflow (values too small for representation in FP16) during backpropagation, loss scaling (or gradient scaling) is utilized. The loss is scaled up by a large factor before backpropagation, and subsequently, gradients are scaled down by the same factor post-backpropagation. 
 
 Incorporating these two features is straightforward, akin to earlier additions, as PyTorch already includes a scaler object and a context manager function for mixed precision.
@@ -121,7 +121,7 @@ for epoch in range(num_epochs):
 ```
 
 
-#### Benchmarking example: #### 
+#### Benchmarking example:
 
 To demonstrate the acceleration gain using only these simple techniques (Multiple workers + Asynchronous data transfers + Mixed precision & Grad scaler), I used a ResNet50 model (famous for benchmarking), Trained in the following conditions: 
 
@@ -136,11 +136,11 @@ To demonstrate the acceleration gain using only these simple techniques (Multipl
 
 **Results:** Training was accelerated *6 times going down from 1H to 10min for the whole training (6 epochs). Accuracy and other evaluation metrics showed that the model is equally performing with or without these techniques which proves that no accuracy was lost at the expence of computation time.
 
-### Advanced Parallelization Techniques ###
+### Advanced Parallelization Techniques
 
 In this section, more advanced methods for accelerating computations will be discussed, necessitating the use of multiple GPU devices and/or multiple nodes. Through multiprocessing, several instances of the same program run on distinct computing devices with separate memory spaces. Assigning different data or code to these instances can expedite computation, assuming that tasks can be divided and consistent results achieved. Typically, this requires communication between the processes.
 
-#### Distributed Data Prallelism (DDP) ####
+#### Distributed Data Prallelism (DDP)
 
 
 [DistributedDataParallel](https://pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html#torch.nn.parallel.DistributedDataParallel) (DDP) implements data parallelism at the module level which can run across multiple machines. Applications using DDP should spawn multiple processes and create a single DDP instance per process. DDP uses collective communications in the torch.distributed package to synchronize gradients and buffers. More specifically, DDP registers an autograd hook for each parameter given by model.parameters() and the hook will fire when the corresponding gradient is computed in the backward pass. Then DDP uses that signal to trigger gradient synchronization across processes. The recommended way to use DDP is to spawn one process for each model replica, where a model replica can span multiple devices. DDP processes can be placed on the same machine or across machines, but GPU devices cannot be shared across processes. 
@@ -149,7 +149,7 @@ In this section, more advanced methods for accelerating computations will be dis
 
 Implementation Tutorial: [Getting Started with Distributed Data Parallel — PyTorch Tutorials 2.3.0+cu121 documentation](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)
 
-#### Pipeline Parallelism ####
+#### Pipeline Parallelism
 
 Pipeline parallelism was original introduced in the Gpipe paper and is an efficient technique to train large models on multiple GPUs.
 
@@ -168,7 +168,7 @@ The figure represents a model with 4 layers placed on 4 different GPUs (vertical
 Implementation Tutorial: [Training Transformer models using Pipeline Parallelism — PyTorch Tutorials 2.2.0+cu121 documentation](https://pytorch.org/tutorials/intermediate/pipeline_tutorial.html)
 
 
-#### Tensor Parallelism ####
+#### Tensor Parallelism
 
 
 Tensor Parallel (TP) was originally proposed in the [Megatron-LM](https://arxiv.org/abs/1909.08053) paper, and it is an efficient model parallelism technique to train large scale Transformer models. [Sequence Parallel](https://arxiv.org/abs/2205.05198) (SP) is a variant of Tensor Parallel that shards on the sequence dimension for nn.LayerNorm or RMSNorm to further save activation memory during training. As the model becomes larger, the activation memory becomes the bottleneck, so in Tensor Parallel training it usually applies Sequence Parallel to LayerNorm or RMSNorm layers.
@@ -192,7 +192,7 @@ Implementation Tutorial: [Large Scale Transformer model training with Tensor Par
 **Remark**: Pytorch-Lightning offers even simpler implementations of these parallelization techniques.
 
 
-### Fine Tuning Optimization: Low-Rank Adaptation (LoRA) ###
+### Fine Tuning Optimization: Low-Rank Adaptation (LoRA)
 
 
 Now, focusing on a more specific training task: fine-tuning or transfer learning. To minimize the number of parameters updated in this step, various approaches add trainable layers at the end of the model, before, or between the self-attention multiheads. LoRA represents a different paradigm, seeking the least number of the model's parameters modifications to achieve comparable results.
@@ -230,7 +230,7 @@ lora_model = get_peft_model(model, config)
 print_trainable_parameters(lora_model)
 ```
 
-### References ###
+### References
 1- [Formation FIDLE (CNRS)](https://fidle.cnrs.fr/w3/)
 
 2- [PyTorch documentation — PyTorch 2.3 documentation](https://pytorch.org/docs/stable/index.html)
