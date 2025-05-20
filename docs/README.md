@@ -10,7 +10,7 @@ This repository provides a proof of concept for semantic augmentation of synthet
 
 - General strategy: [General Approach](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/general_approach.md)
 
-- Training experiments and results: [CV:Data:Synset:Syn2Real:Controlnet training -BDS R&D CVLab-Confluence](https://confluencebdsfr.fsc.atos-services.net/pagesd/viewpage.action?pageId=618758247)
+- Training experiments and results: [ControlNet FineTuning](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/controlnet_finetuning.md)
 
 - Computation acceleration methods: [Acceleration](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/acceleration.md)
 
