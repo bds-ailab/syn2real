@@ -1,4 +1,4 @@
-## State of the Art ##
+## State of the Art
 
 Image Generation Models :
 
@@ -18,7 +18,7 @@ Image Generation Models :
 | [Image-to-Image Translation with Conditional Adversarial Networks (arxiv.org)](https://arxiv.org/abs/1611.07004) (cGAN) | [GitHub - junyanz/pytorch-CycleGAN-and-pix2pix: Image-to-Image Translation in PyTorch](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix) | **Contributions**: <br> - Conditional GAN for image to image translation <br> - Add L1 error constraints to force the model to generate images close to the input ones. <br><br> **Cons**: This model does not accommodate text prompts inputs to edit/augment the generated images. |
 | [Diffusion Models Beat GANs on Image Synthesis](https://github.com/openai/guided-diffusion) | - | **Comparative study of GANs and DMs**: <br> **GANs**: <br> - Faster processing time because of one forward pass instead of multiple. <br> - Fidelity, GANs can produce high quality images. <br> - Difficult & unstable training. <br> - Restricted generation diversity. <br><br> **DMs**: <br> - Higher diversity in generated images. <br> - Much longer forward pass. |
 
-### Domain Adaptation for Realistic Generation ### 
+### Domain Adaptation for Realistic Generation
 
 | Paper | Code | Description |
 |---------|----------|---------|
