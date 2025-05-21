@@ -1,11 +1,13 @@
 # LLMs for data semantic augmentation
 
 ## ✍️ Description
+
 \
 This repository provides a proof of concept for semantic augmentation of synthetic images using diffusion models. Each pipeline component is encapsulated in a Docker container, and all containers (services) are managed through a Docker Compose file.
 \
 
 ## 📄 Detailed documentation links
+
 \
 Here are some useful links describing the project:
 
@@ -17,8 +19,8 @@ Here are some useful links describing the project:
 
 - Computation acceleration methods: [Acceleration](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/acceleration.md)
 
-  
 ## ⚙️ Installation
+
 \
 Please follow these steps:
 
@@ -53,13 +55,13 @@ Please follow these steps:
     ```
 
 ## 🎯 Important services
+
 \
 This repository contains multiples services, allowing different processes:
 
-
 1. **controlnet_sdxl**: This service contains all the training & evaluation scripts for Controlnet-SDXL using FMLE experiments. The script [launch.sh](../src/controlnet_sdxl/launch.sh) starts the training of controlnet using previous checkpoints and a given dataset, it can be used to launch to the experiment on FMLE. the script will automatically create the output folders using the name given as argument.
 
-    ```
+    ```env
     # Complete the output path of the checkpoints
     export OUTPUT_DIR="/out/..."
     # The original stable diffusion xl weights (don't modify)
@@ -85,6 +87,7 @@ This repository contains multiples services, allowing different processes:
     ```
 
 ## 📚 Some Results
+
 \
 Here’s an example of our model's output from a synthetic input image with various instructions provided in the text prompt. The model successfully enhances the realism of synthetic images while adhering to prompt instructions, such as specific car colors, and preserving the semantic integrity of each object from the original image.
 
