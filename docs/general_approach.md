@@ -2,7 +2,6 @@
 
 ### Baseline classifier for problem demonstration
 
-
 Although synthetic data offers significant advantages for training deep learning models on common tasks such as classification, tracking, and segmentation, thanks to its adaptability and complete control over image content, it also comes with certain limitations. The primary limitation of using synthetic data is that training a model solely on these datasets introduces an overfitting bias, leading to a drop in performance when testing the model on real-world images. This issue, commonly referred to as "Domain Shift." in the state of the art, highlights the gap between synthetic and real data domains. To demonstrate this phenomenon, we used the [Syn2real Benchmark](https://ai.bu.edu/syn2real/) dataset, which includes annotated images of synthetic and real objects, to train a simple ResNet50-based classifier and then analyzed its performance.
 
 ![image](https://github.com/user-attachments/assets/6838ab6d-b189-4aca-b2c0-d87ff1de6c87)
