@@ -1,6 +1,6 @@
 services:
   baseline_model:
-    image: ${IMAGE_NAME_BASELINE:syn2real/baseline}:${IMAGE_TAG:-dev}
+    image: ${IMAGE_NAME_BASELINE:-syn2real/baseline}:${IMAGE_TAG:-dev}
     build:
       context: ./src/baseline_model
       shm_size: ${LOW_SHM:-2gb}
@@ -25,7 +25,7 @@ services:
       - output:/out
 
   controlnet_finetuning:
-    image: ${IMAGE_NAME_CONTROLNET:syn2real/controlnet}:${IMAGE_TAG:-dev}
+    image: ${IMAGE_NAME_CONTROLNET:-syn2real/controlnet}:${IMAGE_TAG:-dev}
     build:
       context: ./src/controlnet_finetuning
       shm_size: ${HIGH_SHM:-10gb}
@@ -49,7 +49,7 @@ services:
       - output:/out
 
   blip_caption:
-    image: ${IMAGE_NAME_BLIP:syn2real/blip}:${IMAGE_TAG:-dev}
+    image: ${IMAGE_NAME_BLIP:-syn2real/blip}:${IMAGE_TAG:-dev}
     build:
       context: ./src/blip_caption
       shm_size: ${LOW_SHM:-2gb}
@@ -73,7 +73,7 @@ services:
       - output:/out
 
   mlflow:
-    image: ${IMAGE_NAME_MLFLOW:syn2real/mlflow}:${IMAGE_TAG:-dev}
+    image: ${IMAGE_NAME_MLFLOW:-syn2real/mlflow}:${IMAGE_TAG:-dev}
     build:
       context: ./mlflow
       shm_size: ${LOW_SHM:-2gb}
@@ -97,7 +97,7 @@ services:
       - output:/out
 
   deepfloyd:
-    image: ${IMAGE_NAME_DEEPF:syn2real/deepfloyd}:${IMAGE_TAG:-dev}
+    image: ${IMAGE_NAME_DEEPF:-syn2real/deepfloyd}:${IMAGE_TAG:-dev}
     build:
       context: ./src/deepfloyd_scaler
       shm_size: ${HIGH_SHM:-10gb}
@@ -121,7 +121,7 @@ services:
       - output:/out
 
   sdxl:
-    image: ${IMAGE_NAME_SDXL:syn2real/sdxl}:${IMAGE_TAG:-dev}
+    image: ${IMAGE_NAME_SDXL:-syn2real/sdxl}:${IMAGE_TAG:-dev}
     build:
       context: ./src/controlnet_sdxl
       shm_size: ${HIGH_SHM:-10gb}
@@ -145,7 +145,7 @@ services:
       - output:/out
 
   model_eval:
-    image: ${IMAGE_NAME_EVAL:syn2real/eval}:${IMAGE_TAG:-dev}
+    image: ${IMAGE_NAME_EVAL:-syn2real/eval}:${IMAGE_TAG:-dev}
     build:
       context: ./src/model_eval
       shm_size: 20gb
@@ -169,7 +169,7 @@ services:
       - output:/out
 
   gan:
-    image: ${IMAGE_NAME_GAN:syn2real/gan}:${IMAGE_TAG:-dev}
+    image: ${IMAGE_NAME_GAN:-syn2real/gan}:${IMAGE_TAG:-dev}
     build:
       context: ./src/gan
       shm_size: ${HIGH_SHM:-10gb}
