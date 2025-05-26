@@ -227,7 +227,7 @@ services:
       USER_NAME: ${USER_NAME}
     volumes:
       - data:/data
-      - src_path_gann:/gan
+      - src_path_gan:/gan
       - models:/models
       - output:/out
 
@@ -272,7 +272,7 @@ volumes:
       type: none
       o: bind
       device: ${SRC_PATH:-./src}/model_eval
-  src_path_gann:
+  src_path_gan:
     driver_opts:
       type: none
       o: bind
