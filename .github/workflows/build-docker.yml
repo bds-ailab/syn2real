@@ -29,19 +29,13 @@ jobs:
       - name: 🏗️ Build the image
         id: build
         env:
-          # Variables needed in docker compose
-          GROUP_ID: ${{ vars.DEFAULT_GROUP_ID }}
-          GROUP_NAME: ${{ vars.DEFAULT_GROUP_NAME }}
-          USER_ID: ${{ vars.DEFAULT_USER_ID }}
-          USER_NAME: ${{ vars.DEFAULT_ACC_NAME }}
-
           # Tag depends on the trigger that called this workflow [ manual | merge | release ]
           #   manual  ->  <image-name>:<ref-hash>
           #   merge   ->  <image-name>:<ref-name>
           #   release ->  <image-name>:<tag>
-          IMAGE_NAME_CONTROLNET: ${{ steps.get-image-name.outputs.name }}/controlnet
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           IMAGE_NAME_BASELINE: ${{ steps.get-image-name.outputs.name }}/baseline
+          IMAGE_NAME_CONTROLNET: ${{ steps.get-image-name.outputs.name }}/controlnet
           IMAGE_NAME_BLIP: ${{ steps.get-image-name.outputs.name }}/blip
           IMAGE_NAME_MLFLOW: ${{ steps.get-image-name.outputs.name }}/mlflow
           IMAGE_NAME_DEEPF: ${{ steps.get-image-name.outputs.name }}/deepfloyd
@@ -49,7 +43,6 @@ jobs:
           IMAGE_NAME_EVAL: ${{ steps.get-image-name.outputs.name }}/eval
           IMAGE_NAME_GAN: ${{ steps.get-image-name.outputs.name }}/gan
 
-        # With no-cache because of pip dependencies
         run: docker compose build baseline_model
 
       - name: 🔒 Login to GitHub Container Registry
