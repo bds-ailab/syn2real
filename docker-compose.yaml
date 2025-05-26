@@ -5,7 +5,7 @@ services:
       context: ./src/baseline_model
       shm_size: ${LOW_SHM:-2gb}
       args:
-        REPO_LINK: ${REPO_LINK}
+        REPO_URL: ${REPO_URL}
         USER_NAME: ${USER_NAME}
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}

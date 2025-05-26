@@ -9,7 +9,7 @@ on:
 
 env:
   IMAGE_TAG: ${{ (github.event_name == 'push' || github.event_name == 'release') && github.ref_name || github.sha }}
-  REPO_LINK: https://github.com/${{ github.repository }}
+  REPO_URL: https://github.com/${{ github.repository }}
 jobs:
   build:
     name: 🏗️ Build the image
@@ -53,7 +53,7 @@ jobs:
           IMAGE_NAME_GAN: ${{ steps.get-image-name.outputs.name }}/gan
 
         # With no-cache because of pip dependencies
-        run: docker compose build baseline_model --tag ${{ steps.get-image-name.outputs.name }}:${{ env.IMAGE_TAG }}
+        run: docker compose build baseline_model
 
       - name: 🔒 Login to GitHub Container Registry
         uses: docker/login-action@v3

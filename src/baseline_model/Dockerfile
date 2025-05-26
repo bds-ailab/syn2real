@@ -1,8 +1,8 @@
 FROM pytorch/pytorch:2.3.0-cuda11.8-cudnn8-runtime
 
-ARG REPO_LINK
+ARG REPO_URL
 
-LABEL org.opencontainers.image.source="$REPO_LINK"
+LABEL org.opencontainers.image.source="$REPO_URL"
 
 ARG USER_NAME
 ARG USER_ID
