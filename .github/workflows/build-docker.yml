@@ -9,16 +9,11 @@ on:
 
 env:
   IMAGE_TAG: ${{ (github.event_name == 'push' || github.event_name == 'release') && github.ref_name || github.sha }}
-
+  REPO_LINK: https://github.com/${{ github.repository }}
 jobs:
   build:
     name: 🏗️ Build the image
     runs-on: ubuntu-latest
-    env:
-      # Use the mirror with http (registry in the "FROM" instruction)
-      SNAPSHOT_REGISTRY: ${{ vars.SF2_REGISTRY_URL }}/${{ vars.SF2_DOCKER_SNAPSHOT }}
-      RELEASE_REGISTRY: ${{ vars.SF2_REGISTRY_URL }}/${{ vars.SF2_DOCKER_RELEASE }}
-      NEWUSERS_FILE_PATH: ./src/controlnet_sdxl/new_users.txt
     steps:
       - name: 📁 Checkout
         uses: actions/checkout@v3
@@ -26,23 +21,15 @@ jobs:
       - name: 🎫 Get image name
         id: get-image-name
         run: |
-          echo "name=${{ vars.IMAGE_NAME }}" >> $GITHUB_OUTPUT
-          echo "snapshot-name=${{ env.SNAPSHOT_REGISTRY }}/${{ vars.IMAGE_NAME }}" >> $GITHUB_OUTPUT
+          echo "name=ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}" >> $GITHUB_OUTPUT
 
-      # We need to login first to access artifactory at build time
-      - name: 🔐 Login to Artifactory
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ vars.SF2_REGISTRY_URL }}
-          username: ${{ secrets.GLB_BDS_SF2_JFROG_USERNAME }}
-          password: ${{ secrets.GLB_BDS_SF2_JFROG_PWD }}
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: 🏗️ Build the image
         id: build
         env:
           # Variables needed in docker compose
-          HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
-          HTTPS_PROXY: ${{ secrets.HTTP_PROXY }}
           GROUP_ID: ${{ vars.DEFAULT_GROUP_ID }}
           GROUP_NAME: ${{ vars.DEFAULT_GROUP_NAME }}
           LOW_SHM: ${{ secrets.LOW_SHM }}
@@ -50,60 +37,56 @@ jobs:
           SRC_PATH: ${{ secrets.SRC_PATH }}
           USER_ID: ${{ secrets.DEFAULT_USER_ID }}
           USER_NAME: ${{ secrets.DEFAULT_ACC_NAME }}
-          NEWUSERS_FILE_PATH: ./src/controlnet_sdxl/new_users.txt
-
-          # 🚨 IF YOU NEED MORE ENVIRONMENT VARIABLES AT BUILD, PLEASE ADD THEM HERE
 
           # Tag depends on the trigger that called this workflow [ manual | merge | release ]
           #   manual  ->  <image-name>:<ref-hash>
           #   merge   ->  <image-name>:<ref-name>
           #   release ->  <image-name>:<tag>
-          IMAGE_NAME_CONTROLNET: ${{ steps.get-image-name.outputs.snapshot-name }}/controlnet
-          IMAGE_TAG_CONTROLNET: ${{ env.IMAGE_TAG }}
-          IMAGE_NAME_BASELINE: ${{ steps.get-image-name.outputs.snapshot-name }}/baseline
-          IMAGE_TAG_BASELINE: ${{ env.IMAGE_TAG }}
-          IMAGE_NAME_BLIP: ${{ steps.get-image-name.outputs.snapshot-name }}/blip
-          IMAGE_TAG_BLIP: ${{ env.IMAGE_TAG }}
-          IMAGE_NAME_MLFLOW: ${{ steps.get-image-name.outputs.snapshot-name }}/mlflow
-          IMAGE_TAG_MLFLOW: ${{ env.IMAGE_TAG }}
-          IMAGE_NAME_DEEPF: ${{ steps.get-image-name.outputs.snapshot-name }}/deepfloyd
-          IMAGE_TAG_DEEPF: ${{ env.IMAGE_TAG }}
-          IMAGE_NAME_SDXL: ${{ steps.get-image-name.outputs.snapshot-name }}/sdxl
-          IMAGE_TAG_SDXL: ${{ env.IMAGE_TAG }}
-          IMAGE_NAME_EVAL: ${{ steps.get-image-name.outputs.snapshot-name }}/eval
-          IMAGE_TAG_EVAL: ${{ env.IMAGE_TAG }}
-          IMAGE_NAME_GAN: ${{ steps.get-image-name.outputs.snapshot-name }}/gan
-          IMAGE_TAG_GAN: ${{ env.IMAGE_TAG }}
-          IMAGE_NAME: ${{ steps.get-image-name.outputs.snapshot-name }}
+          IMAGE_NAME_CONTROLNET: ${{ steps.get-image-name.outputs.name }}/controlnet
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          IMAGE_NAME_BASELINE: ${{ steps.get-image-name.outputs.name }}/baseline
+          IMAGE_NAME_BLIP: ${{ steps.get-image-name.outputs.name }}/blip
+          IMAGE_NAME_MLFLOW: ${{ steps.get-image-name.outputs.name }}/mlflow
+          IMAGE_NAME_DEEPF: ${{ steps.get-image-name.outputs.name }}/deepfloyd
+          IMAGE_NAME_SDXL: ${{ steps.get-image-name.outputs.name }}/sdxl
+          IMAGE_NAME_EVAL: ${{ steps.get-image-name.outputs.name }}/eval
+          IMAGE_NAME_GAN: ${{ steps.get-image-name.outputs.name }}/gan
 
         # With no-cache because of pip dependencies
-        run: docker compose build
+        run: docker compose build baseline_model --tag ${{ steps.get-image-name.outputs.name }}:${{ env.IMAGE_TAG }}
+
+      - name: 🔒 Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.triggering_actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📦 Store the baseline model image
-        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}/baseline:${{ env.IMAGE_TAG }}
+        run: docker push ${{ steps.get-image-name.outputs.name }}/baseline:${{ env.IMAGE_TAG }}
 
-      - name: 📦 Store the controlnet finetuning image
-        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}/controlnet:${{ env.IMAGE_TAG }}
+      # - name: 📦 Store the controlnet finetuning image
+      #   run: docker push ${{ steps.get-image-name.outputs.name }}/controlnet:${{ env.IMAGE_TAG }}
 
-      - name: 📦 Store the blip image
-        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}/blip:${{ env.IMAGE_TAG }}
+      # - name: 📦 Store the blip image
+      #   run: docker push ${{ steps.get-image-name.outputs.name }}/blip:${{ env.IMAGE_TAG }}
 
-      - name: 📦 Store the mlflow image
-        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}/mlflow:${{ env.IMAGE_TAG }}
+      # - name: 📦 Store the mlflow image
+      #   run: docker push ${{ steps.get-image-name.outputs.name }}/mlflow:${{ env.IMAGE_TAG }}
 
-      - name: 📦 Store the deepfloyd image
-        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}/deepfloyd:${{ env.IMAGE_TAG }}
+      # - name: 📦 Store the deepfloyd image
+      #   run: docker push ${{ steps.get-image-name.outputs.name }}/deepfloyd:${{ env.IMAGE_TAG }}
 
-      - name: 📦 Store the sdxl image
-        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}/sdxl:${{ env.IMAGE_TAG }}
+      # - name: 📦 Store the sdxl image
+      #   run: docker push ${{ steps.get-image-name.outputs.name }}/sdxl:${{ env.IMAGE_TAG }}
 
-      - name: 📦 Store the model evaluation image
-        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}/eval:${{ env.IMAGE_TAG }}
+      # - name: 📦 Store the model evaluation image
+      #   run: docker push ${{ steps.get-image-name.outputs.name }}/eval:${{ env.IMAGE_TAG }}
 
-      - name: 📦 Store the cyclegan turbo image
-        run: docker push ${{ steps.get-image-name.outputs.snapshot-name }}/gan:${{ env.IMAGE_TAG }}
+      # - name: 📦 Store the cyclegan turbo image
+      #   run: docker push ${{ steps.get-image-name.outputs.name }}/gan:${{ env.IMAGE_TAG }}
 
       - name: 📜 Summary
         run: |
           echo "### \`${{ steps.get-image-name.outputs.name }}\` built and published" >> "$GITHUB_STEP_SUMMARY"
-          echo "To use it you can run: \`docker pull ${{ steps.get-image-name.outputs.snapshot-name }}:${{ env.IMAGE_TAG }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "To use it you can run: \`docker pull ${{ steps.get-image-name.outputs.name }}:${{ env.IMAGE_TAG }}\`" >> "$GITHUB_STEP_SUMMARY"

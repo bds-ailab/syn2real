@@ -1,24 +1,20 @@
 services:
   baseline_model:
-    image: ${IMAGE_NAME_BASELINE}:${IMAGE_TAG_BASELINE}
+    image: ${IMAGE_NAME_BASELINE}:${IMAGE_TAG}
     build:
       context: ./src/baseline_model
       shm_size: ${LOW_SHM:-2gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
+        REPO_LINK: ${REPO_LINK}
         USER_NAME: ${USER_NAME}
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
         SRC_PATH: ${SRC_PATH:?error}
     shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
       GROUP_ID: ${GROUP_ID}
       GROUP_NAME: ${GROUP_NAME}
       USER_ID: ${USER_ID}
@@ -30,7 +26,7 @@ services:
       - output:/out
 
   controlnet_finetuning:
-    image: ${IMAGE_NAME_CONTROLNET}:${IMAGE_TAG_CONTROLNET}
+    image: ${IMAGE_NAME_CONTROLNET}:${IMAGE_TAG}
     build:
       context: ./src/controlnet_finetuning
       shm_size: ${HIGH_SHM:-10gb}
@@ -60,7 +56,7 @@ services:
       - output:/out
 
   blip_caption:
-    image: ${IMAGE_NAME_BLIP}:${IMAGE_TAG_BLIP}
+    image: ${IMAGE_NAME_BLIP}:${IMAGE_TAG}
     build:
       context: ./src/blip_caption
       shm_size: ${LOW_SHM:-2gb}
@@ -90,7 +86,7 @@ services:
       - output:/out
 
   mlflow:
-    image: ${IMAGE_NAME_MLFLOW}:${IMAGE_TAG_MLFLOW}
+    image: ${IMAGE_NAME_MLFLOW}:${IMAGE_TAG}
     build:
       context: ./mlflow
       shm_size: ${LOW_SHM:-2gb}
@@ -120,7 +116,7 @@ services:
       - output:/out
 
   deepfloyd:
-    image: ${IMAGE_NAME_DEEPF}:${IMAGE_TAG_DEEPF}
+    image: ${IMAGE_NAME_DEEPF}:${IMAGE_TAG}
     build:
       context: ./src/deepfloyd_scaler
       shm_size: ${HIGH_SHM:-10gb}
@@ -150,7 +146,7 @@ services:
       - output:/out
 
   sdxl:
-    image: ${IMAGE_NAME_SDXL}:${IMAGE_TAG_SDXL}
+    image: ${IMAGE_NAME_SDXL}:${IMAGE_TAG}
     build:
       context: ./src/controlnet_sdxl
       shm_size: ${HIGH_SHM:-10gb}
@@ -181,7 +177,7 @@ services:
       - output:/out
 
   model_eval:
-    image: ${IMAGE_NAME_EVAL}:${IMAGE_TAG_EVAL}
+    image: ${IMAGE_NAME_EVAL}:${IMAGE_TAG}
     build:
       context: ./src/model_eval
       shm_size: 20gb
@@ -212,7 +208,7 @@ services:
       - output:/out
 
   gan:
-    image: ${IMAGE_NAME_GAN}:${IMAGE_TAG_GAN}
+    image: ${IMAGE_NAME_GAN}:${IMAGE_TAG}
     build:
       context: ./src/gan
       shm_size: ${HIGH_SHM:-10gb}

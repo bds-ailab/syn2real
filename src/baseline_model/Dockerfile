@@ -1,9 +1,9 @@
-ARG REGISTRY
+FROM pytorch/pytorch:2.3.0-cuda11.8-cudnn8-runtime
 
-FROM ${REGISTRY}/pytorch/pytorch:2.3.0-cuda11.8-cudnn8-runtime
+ARG REPO_LINK
 
-ARG https_proxy
-ARG http_proxy
+LABEL org.opencontainers.image.source="$REPO_LINK"
+
 ARG USER_NAME
 ARG USER_ID
 ARG GROUP_NAME
@@ -38,7 +38,3 @@ USER "${USER_NAME}":"${GROUP_NAME}"
 COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./requirements_baseline.txt /requirements_baseline.txt
 RUN pip install --user --upgrade pip\
     pip install --user --default-timeout=100 --no-cache-dir -r /requirements_baseline.txt
-
-# COPY --chown="${USER_NAME}":"${GROUP_NAME}" entrypoint.sh /entrypoint.sh
-
-# Write your docker commands here

@@ -1,6 +1,5 @@
 name: create-or-update-comment
 description: 'Create or update a comment in a PR or an issue.'
-# From SEED https://github.com/BDS-SEED/seed-common-actions/blob/a92ad14ffcc92cd3adce7f1132b1768d2b166e0b/.github/actions/create-or-update-comment/action.yaml
 
 inputs:
   body:
