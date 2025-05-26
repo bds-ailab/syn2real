@@ -42,8 +42,6 @@ services:
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
       GROUP_ID: ${GROUP_ID}
       GROUP_NAME: ${GROUP_NAME}
       USER_ID: ${USER_ID}
@@ -71,8 +69,6 @@ services:
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
       GROUP_ID: ${GROUP_ID}
       GROUP_NAME: ${GROUP_NAME}
       USER_ID: ${USER_ID}
@@ -100,8 +96,6 @@ services:
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
       GROUP_ID: ${GROUP_ID}
       GROUP_NAME: ${GROUP_NAME}
       USER_ID: ${USER_ID}
@@ -129,8 +123,6 @@ services:
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
       GROUP_ID: ${GROUP_ID}
       GROUP_NAME: ${GROUP_NAME}
       USER_ID: ${USER_ID}
@@ -159,8 +151,6 @@ services:
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
       GROUP_ID: ${GROUP_ID}
       GROUP_NAME: ${GROUP_NAME}
       USER_ID: ${USER_ID}
@@ -189,8 +179,6 @@ services:
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
       GROUP_ID: ${GROUP_ID}
       GROUP_NAME: ${GROUP_NAME}
       USER_ID: ${USER_ID}
@@ -219,8 +207,6 @@ services:
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
       GROUP_ID: ${GROUP_ID}
       GROUP_NAME: ${GROUP_NAME}
       USER_ID: ${USER_ID}

@@ -32,11 +32,10 @@ jobs:
           # Variables needed in docker compose
           GROUP_ID: ${{ vars.DEFAULT_GROUP_ID }}
           GROUP_NAME: ${{ vars.DEFAULT_GROUP_NAME }}
-          LOW_SHM: ${{ secrets.LOW_SHM }}
-          HIGH_SHM: ${{ secrets.HIGH_SHM }}
-          SRC_PATH: ${{ secrets.SRC_PATH }}
-          USER_ID: ${{ secrets.DEFAULT_USER_ID }}
-          USER_NAME: ${{ secrets.DEFAULT_ACC_NAME }}
+          LOW_SHM: ${{ vars.LOW_SHM }}
+          HIGH_SHM: ${{ vars.HIGH_SHM }}
+          USER_ID: ${{ vars.DEFAULT_USER_ID }}
+          USER_NAME: ${{ vars.DEFAULT_ACC_NAME }}
 
           # Tag depends on the trigger that called this workflow [ manual | merge | release ]
           #   manual  ->  <image-name>:<ref-hash>
