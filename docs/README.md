@@ -5,7 +5,6 @@
 \
 This repository provides a proof of concept for semantic augmentation of synthetic images using diffusion models. Each pipeline component is encapsulated in a Docker container, and all containers (services) are managed through a Docker Compose file.
 
-
 ## 📄 Detailed documentation links
 
 \
@@ -34,9 +33,7 @@ Please follow these steps:
 2. Copy the file .template-env and Configure your environment variables in the `.env` file:
 
     ```python
-    # Replace the fields with your personal informations
-    HTTP_PROXY=
-    HTTPS_PROXY=
+    # Replace the fields with your informations
     USER_NAME=
     USER_ID=
     GROUP_NAME=

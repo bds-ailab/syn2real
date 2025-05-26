@@ -1,14 +1,9 @@
-ARG REGISTRY
+FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
 
-FROM ${REGISTRY}/pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
-
-ARG https_proxy
-ARG http_proxy
 ARG USER_NAME
 ARG USER_ID
 ARG GROUP_NAME
 ARG GROUP_ID
-ARG SRC_PATH
 
 # ENV DEBIAN_FRONTEND=noninteractive
 

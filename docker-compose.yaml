@@ -10,7 +10,6 @@ services:
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        SRC_PATH: ${SRC_PATH:-./src}
     shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
@@ -31,13 +30,10 @@ services:
       context: ./src/controlnet_finetuning
       shm_size: ${HIGH_SHM:-10gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
         USER_NAME: ${USER_NAME}
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        SRC_PATH: ${SRC_PATH:-./src}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
     tty: true
@@ -58,13 +54,10 @@ services:
       context: ./src/blip_caption
       shm_size: ${LOW_SHM:-2gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
         USER_NAME: ${USER_NAME}
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        SRC_PATH: ${SRC_PATH:-./src}
     shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
@@ -85,13 +78,10 @@ services:
       context: ./mlflow
       shm_size: ${LOW_SHM:-2gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
         USER_NAME: ${USER_NAME}
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        SRC_PATH: ${SRC_PATH:-./src}
     shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
@@ -112,13 +102,10 @@ services:
       context: ./src/deepfloyd_scaler
       shm_size: ${HIGH_SHM:-10gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
         USER_NAME: ${USER_NAME}
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        SRC_PATH: ${SRC_PATH:-./src}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
     tty: true
@@ -139,13 +126,10 @@ services:
       context: ./src/controlnet_sdxl
       shm_size: ${HIGH_SHM:-10gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
         USER_NAME: ${USER_NAME}
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        SRC_PATH: ${SRC_PATH:-./src}
         NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
@@ -167,13 +151,10 @@ services:
       context: ./src/model_eval
       shm_size: 20gb
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
         USER_ID: ${USER_ID}
         USER_NAME: ${USER_NAME}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        SRC_PATH: ${SRC_PATH:-./src}
         NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
     shm_size: 20gb
     stdin_open: true
@@ -195,13 +176,10 @@ services:
       context: ./src/gan
       shm_size: ${HIGH_SHM:-10gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
         USER_NAME: ${USER_NAME}
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        SRC_PATH: ${SRC_PATH:-./src}
         NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
