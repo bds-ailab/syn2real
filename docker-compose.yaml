@@ -7,7 +7,7 @@ services:
       args:
         REPO_URL: ${REPO_URL}
         USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
+        USER_ID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
     shm_size: ${LOW_SHM:-2gb}
@@ -31,7 +31,7 @@ services:
       shm_size: ${HIGH_SHM:-10gb}
       args:
         USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
+        USER_ID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
     shm_size: ${HIGH_SHM:-10gb}
@@ -55,7 +55,7 @@ services:
       shm_size: ${LOW_SHM:-2gb}
       args:
         USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
+        USER_ID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
     shm_size: ${LOW_SHM:-2gb}
@@ -79,7 +79,7 @@ services:
       shm_size: ${LOW_SHM:-2gb}
       args:
         USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
+        USER_ID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
     shm_size: ${LOW_SHM:-2gb}
@@ -103,7 +103,7 @@ services:
       shm_size: ${HIGH_SHM:-10gb}
       args:
         USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
+        USER_ID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
     shm_size: ${HIGH_SHM:-10gb}
@@ -127,10 +127,9 @@ services:
       shm_size: ${HIGH_SHM:-10gb}
       args:
         USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
+        USER_ID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
     tty: true
@@ -155,7 +154,6 @@ services:
         USER_NAME: ${USER_NAME}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
     shm_size: 20gb
     stdin_open: true
     tty: true
@@ -177,10 +175,9 @@ services:
       shm_size: ${HIGH_SHM:-10gb}
       args:
         USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
+        USER_ID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
     tty: true
