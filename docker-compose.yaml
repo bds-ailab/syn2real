@@ -10,7 +10,7 @@ services:
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        SRC_PATH: ${SRC_PATH:?error}
+        SRC_PATH: ${SRC_PATH:-./src}
     shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
@@ -37,8 +37,7 @@ services:
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        SRC_PATH: ${SRC_PATH:-./src}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
     tty: true
@@ -67,8 +66,7 @@ services:
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        SRC_PATH: ${SRC_PATH:-./src}
     shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
@@ -97,8 +95,7 @@ services:
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        SRC_PATH: ${SRC_PATH:-./src}
     shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
@@ -127,8 +124,7 @@ services:
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        SRC_PATH: ${SRC_PATH:-./src}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
     tty: true
@@ -157,8 +153,7 @@ services:
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        SRC_PATH: ${SRC_PATH:-./src}
         NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
@@ -188,8 +183,7 @@ services:
         USER_NAME: ${USER_NAME}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        SRC_PATH: ${SRC_PATH:-./src}
         NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
     shm_size: 20gb
     stdin_open: true
@@ -219,8 +213,7 @@ services:
         USER_UID: ${USER_ID}
         GROUP_NAME: ${GROUP_NAME}
         GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        SRC_PATH: ${SRC_PATH:-./src}
         NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
@@ -243,54 +236,54 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${DATA_PATH:-/dev/null}
+      device: ${DATA_PATH:-./data}
   src_path_baseline:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/baseline_model
+      device: ${SRC_PATH:-./src}/baseline_model
   src_path_controlnet:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/controlnet_finetuning
+      device: ${SRC_PATH:-./src}/controlnet_finetuning
   src_path_blip:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/blip_caption
+      device: ${SRC_PATH:-./src}/blip_caption
   src_path_mlflow:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/../mlflow
+      device: ${SRC_PATH:-./src}/../mlflow
   src_path_deepf:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/deepfloyd_scaler
+      device: ${SRC_PATH:-./src}/deepfloyd_scaler
   src_path_sdxl:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/controlnet_sdxl
+      device: ${SRC_PATH:-./src}/controlnet_sdxl
   src_path_eval:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/model_eval
+      device: ${SRC_PATH:-./src}/model_eval
   src_path_gann:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/gan
+      device: ${SRC_PATH:-./src}/gan
   models:
     driver_opts:
       type: none
       o: bind
-      device: ${MODEL_PATH:-/dev/null}
+      device: ${MODEL_PATH:-./model}
   output:
     driver_opts:
       type: none
       o: bind
-      device: ${OUT_PATH:-/dev/null}
+      device: ${OUT_PATH:-./out}
