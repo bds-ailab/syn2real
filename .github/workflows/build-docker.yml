@@ -32,8 +32,6 @@ jobs:
           # Variables needed in docker compose
           GROUP_ID: ${{ vars.DEFAULT_GROUP_ID }}
           GROUP_NAME: ${{ vars.DEFAULT_GROUP_NAME }}
-          LOW_SHM: ${{ vars.LOW_SHM }}
-          HIGH_SHM: ${{ vars.HIGH_SHM }}
           USER_ID: ${{ vars.DEFAULT_USER_ID }}
           USER_NAME: ${{ vars.DEFAULT_ACC_NAME }}
 
