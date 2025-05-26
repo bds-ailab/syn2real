@@ -4,20 +4,20 @@
 
 \
 This repository provides a proof of concept for semantic augmentation of synthetic images using diffusion models. Each pipeline component is encapsulated in a Docker container, and all containers (services) are managed through a Docker Compose file.
-\
+
 
 ## 📄 Detailed documentation links
 
 \
 Here are some useful links describing the project:
 
-- State of the art study: [SOTA](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/SOTA.md)
+- State of the art study: [SOTA](https://github.com/bds-ailab/syn2real/blob/main/docs/SOTA.md)
 
-- General strategy: [General Approach](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/general_approach.md)
+- General strategy: [General Approach](https://github.com/bds-ailab/syn2real/blob/main/docs/general_approach.md)
 
-- Training experiments and results: [ControlNet FineTuning](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/controlnet_finetuning.md)
+- Training experiments and results: [ControlNet FineTuning](https://github.com/bds-ailab/syn2real/blob/main/docs/controlnet_finetuning.md)
 
-- Computation acceleration methods: [Acceleration](https://github.com/bds-ailab/syn2real/blob/chore/opensourcing-project/12372-update_readme/docs/acceleration.md)
+- Computation acceleration methods: [Acceleration](https://github.com/bds-ailab/syn2real/blob/main/docs/acceleration.md)
 
 ## ⚙️ Installation
 
