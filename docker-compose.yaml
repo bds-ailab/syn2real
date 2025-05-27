@@ -1,28 +1,23 @@
 services:
   baseline_model:
-    image: ${IMAGE_NAME_BASELINE}:${IMAGE_TAG_BASELINE}
+    image: ${IMAGE_NAME_BASELINE:-syn2real/baseline}:${IMAGE_TAG:-dev}
     build:
       context: ./src/baseline_model
       shm_size: ${LOW_SHM:-2gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
-        USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
-        GROUP_NAME: ${GROUP_NAME}
-        GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        REPO_URL: ${REPO_URL}
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
     shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
-      GROUP_ID: ${GROUP_ID}
-      GROUP_NAME: ${GROUP_NAME}
-      USER_ID: ${USER_ID}
-      USER_NAME: ${USER_NAME}
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
     volumes:
       - data:/data
       - src_path_baseline:/baseline_model
@@ -30,29 +25,23 @@ services:
       - output:/out
 
   controlnet_finetuning:
-    image: ${IMAGE_NAME_CONTROLNET}:${IMAGE_TAG_CONTROLNET}
+    image: ${IMAGE_NAME_CONTROLNET:-syn2real/controlnet}:${IMAGE_TAG:-dev}
     build:
       context: ./src/controlnet_finetuning
       shm_size: ${HIGH_SHM:-10gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
-        USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
-        GROUP_NAME: ${GROUP_NAME}
-        GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
-      GROUP_ID: ${GROUP_ID}
-      GROUP_NAME: ${GROUP_NAME}
-      USER_ID: ${USER_ID}
-      USER_NAME: ${USER_NAME}
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
     volumes:
       - data:/data
       - src_path_controlnet:/controlnet_finetuning
@@ -60,29 +49,23 @@ services:
       - output:/out
 
   blip_caption:
-    image: ${IMAGE_NAME_BLIP}:${IMAGE_TAG_BLIP}
+    image: ${IMAGE_NAME_BLIP:-syn2real/blip}:${IMAGE_TAG:-dev}
     build:
       context: ./src/blip_caption
       shm_size: ${LOW_SHM:-2gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
-        USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
-        GROUP_NAME: ${GROUP_NAME}
-        GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
     shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
-      GROUP_ID: ${GROUP_ID}
-      GROUP_NAME: ${GROUP_NAME}
-      USER_ID: ${USER_ID}
-      USER_NAME: ${USER_NAME}
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
     volumes:
       - data:/data
       - src_path_blip:/blip_caption
@@ -90,29 +73,23 @@ services:
       - output:/out
 
   mlflow:
-    image: ${IMAGE_NAME_MLFLOW}:${IMAGE_TAG_MLFLOW}
+    image: ${IMAGE_NAME_MLFLOW:-syn2real/mlflow}:${IMAGE_TAG:-dev}
     build:
       context: ./mlflow
       shm_size: ${LOW_SHM:-2gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
-        USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
-        GROUP_NAME: ${GROUP_NAME}
-        GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
     shm_size: ${LOW_SHM:-2gb}
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
-      GROUP_ID: ${GROUP_ID}
-      GROUP_NAME: ${GROUP_NAME}
-      USER_ID: ${USER_ID}
-      USER_NAME: ${USER_NAME}
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
     volumes:
       - data:/data
       - src_path_mlflow:/mlflow
@@ -120,29 +97,23 @@ services:
       - output:/out
 
   deepfloyd:
-    image: ${IMAGE_NAME_DEEPF}:${IMAGE_TAG_DEEPF}
+    image: ${IMAGE_NAME_DEEPF:-syn2real/deepfloyd}:${IMAGE_TAG:-dev}
     build:
       context: ./src/deepfloyd_scaler
       shm_size: ${HIGH_SHM:-10gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
-        USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
-        GROUP_NAME: ${GROUP_NAME}
-        GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
-      GROUP_ID: ${GROUP_ID}
-      GROUP_NAME: ${GROUP_NAME}
-      USER_ID: ${USER_ID}
-      USER_NAME: ${USER_NAME}
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
     volumes:
       - data:/data
       - src_path_deepf:/deepf
@@ -150,30 +121,23 @@ services:
       - output:/out
 
   sdxl:
-    image: ${IMAGE_NAME_SDXL}:${IMAGE_TAG_SDXL}
+    image: ${IMAGE_NAME_SDXL:-syn2real/sdxl}:${IMAGE_TAG:-dev}
     build:
       context: ./src/controlnet_sdxl
       shm_size: ${HIGH_SHM:-10gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
-        USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
-        GROUP_NAME: ${GROUP_NAME}
-        GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
-        NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
-      GROUP_ID: ${GROUP_ID}
-      GROUP_NAME: ${GROUP_NAME}
-      USER_ID: ${USER_ID}
-      USER_NAME: ${USER_NAME}
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
     volumes:
       - data:/data
       - src_path_sdxl:/sdxl
@@ -181,30 +145,23 @@ services:
       - output:/out
 
   model_eval:
-    image: ${IMAGE_NAME_EVAL}:${IMAGE_TAG_EVAL}
+    image: ${IMAGE_NAME_EVAL:-syn2real/eval}:${IMAGE_TAG:-dev}
     build:
       context: ./src/model_eval
       shm_size: 20gb
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
-        USER_ID: ${USER_ID}
-        USER_NAME: ${USER_NAME}
-        GROUP_NAME: ${GROUP_NAME}
-        GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
-        NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
+        USER_ID: ${USER_ID:-20025}
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
     shm_size: 20gb
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
-      GROUP_ID: ${GROUP_ID}
-      GROUP_NAME: ${GROUP_NAME}
-      USER_ID: ${USER_ID}
-      USER_NAME: ${USER_NAME}
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
     volumes:
       - data:/data
       - src_path_eval:/model_eval
@@ -212,33 +169,26 @@ services:
       - output:/out
 
   gan:
-    image: ${IMAGE_NAME_GAN}:${IMAGE_TAG_GAN}
+    image: ${IMAGE_NAME_GAN:-syn2real/gan}:${IMAGE_TAG:-dev}
     build:
       context: ./src/gan
       shm_size: ${HIGH_SHM:-10gb}
       args:
-        http_proxy: ${HTTP_PROXY}
-        https_proxy: ${HTTPS_PROXY}
-        USER_NAME: ${USER_NAME}
-        USER_UID: ${USER_ID}
-        GROUP_NAME: ${GROUP_NAME}
-        GROUP_ID: ${GROUP_ID}
-        REGISTRY: ${RELEASE_REGISTRY}
-        SRC_PATH: ${SRC_PATH:?error}
-        NEWUSERS_FILE_PATH: ${NEWUSERS_FILE_PATH}
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
     shm_size: ${HIGH_SHM:-10gb}
     stdin_open: true
     tty: true
     environment:
-      http_proxy: ${HTTP_PROXY}
-      https_proxy: ${HTTPS_PROXY}
-      GROUP_ID: ${GROUP_ID}
-      GROUP_NAME: ${GROUP_NAME}
-      USER_ID: ${USER_ID}
-      USER_NAME: ${USER_NAME}
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
     volumes:
       - data:/data
-      - src_path_gann:/gan
+      - src_path_gan:/gan
       - models:/models
       - output:/out
 
@@ -247,54 +197,54 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ${DATA_PATH:-/dev/null}
+      device: ${DATA_PATH:-./data}
   src_path_baseline:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/baseline_model
+      device: ${SRC_PATH:-./src}/baseline_model
   src_path_controlnet:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/controlnet_finetuning
+      device: ${SRC_PATH:-./src}/controlnet_finetuning
   src_path_blip:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/blip_caption
+      device: ${SRC_PATH:-./src}/blip_caption
   src_path_mlflow:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/../mlflow
+      device: ${SRC_PATH:-./src}/../mlflow
   src_path_deepf:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/deepfloyd_scaler
+      device: ${SRC_PATH:-./src}/deepfloyd_scaler
   src_path_sdxl:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/controlnet_sdxl
+      device: ${SRC_PATH:-./src}/controlnet_sdxl
   src_path_eval:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/model_eval
-  src_path_gann:
+      device: ${SRC_PATH:-./src}/model_eval
+  src_path_gan:
     driver_opts:
       type: none
       o: bind
-      device: ${SRC_PATH:?error}/gan
+      device: ${SRC_PATH:-./src}/gan
   models:
     driver_opts:
       type: none
       o: bind
-      device: ${MODEL_PATH:-/dev/null}
+      device: ${MODEL_PATH:-./model}
   output:
     driver_opts:
       type: none
       o: bind
-      device: ${OUT_PATH:-/dev/null}
+      device: ${OUT_PATH:-./out}

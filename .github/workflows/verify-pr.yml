@@ -6,8 +6,6 @@ run-name: >-
     format('🧪 Gab is verifying {0}', github.ref_name)
   }}
 
-# Based on https://github.gsissc.myatos.net/GLB-BDS-AILAB-CV/tools-shared_workflows/blob/main/.github/workflows/lint-pr.yml v1.5.0
-
 on:
   pull_request:
   push:
