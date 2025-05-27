@@ -13,54 +13,86 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🧹 List & delete outdated versions
+      - name: 🧹 List & delete outdated versions for all syn2real/* packages
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const org = context.repo.owner;
-            const pkg = 'MY_PACKAGE_NAME';    // ← replace with your package name
+            const org    = context.repo.owner
+            // Target packages under "<repo>/…"
+            const prefix = `${repo}/`
 
-            // same flexible SemVer regex as before
-            const semver = /^v?(0|[1-9]\d*)(?:\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+            // Flexible SemVer: optional leading “v”, optional minor/patch, prerelease/build
+            const semver = /^v?(0|[1-9]\d*)?:\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/x
 
-            let page = 1;
+            // 1️⃣ List all container packages, filter by prefix
+            let pkgPage = 1
+            const pkgNames = []
+
             while (true) {
-              // LIST versions via raw REST call
-              const { data: versions } = await github.request(
-                'GET /orgs/{org}/packages/{package_type}/{package_name}/versions',
+              const { data: pkgs } = await github.request(
+                'GET /orgs/{org}/packages',
                 {
                   org,
                   package_type: 'container',
-                  package_name: pkg,
                   per_page: 100,
-                  page
+                  page: pkgPage
                 }
-              );
+              )
 
-              if (versions.length === 0) break;
+              if (!pkgs.length) break
 
-              for (const v of versions) {
-                const tags = v.metadata.container.tags || [];
+              for (const p of pkgs) {
+                if (p.name.startsWith(prefix)) {
+                  pkgNames.push(p.name)
+                }
+              }
 
-                // skip if any tag is SemVer or "main"
-                if (tags.some(t => semver.test(t) || t === 'main')) continue;
+              pkgPage++
+            }
 
-                // DELETE the version via raw REST call
-                await github.request(
-                  'DELETE /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}',
+            // 2️⃣ For each matching package, list versions & delete non-SemVer/non-main
+            for (const pkg of pkgNames) {
+              let verPage = 1
+
+              while (true) {
+                const { data: versions } = await github.request(
+                  'GET /orgs/{org}/packages/{package_type}/{package_name}/versions',
                   {
                     org,
                     package_type: 'container',
                     package_name: pkg,
-                    package_version_id: v.id
+                    per_page: 100,
+                    page: verPage
                   }
-                );
+                )
 
-                console.log(`Deleted version ${v.id} (tags: ${tags.join(', ')})`);
+                if (!versions.length) break
+
+                for (const v of versions) {
+                  const tags = v.metadata.container.tags || []
+
+                  // Keep if any tag matches SemVer or is 'main'
+                  if (tags.some(t => semver.test(t) || t === 'main')) {
+                    continue
+                  }
+
+                  // Otherwise delete it
+                  await github.request(
+                    'DELETE /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}',
+                    {
+                      org,
+                      package_type: 'container',
+                      package_name: pkg,
+                      package_version_id: v.id
+                    }
+                  )
+
+                  console.log(`Deleted ${pkg}@${v.id} (tags: ${tags.join(', ')})`)
+                }
+
+                verPage++
               }
-
-              page++;
             }
 
       - name: 📝 Cleanup job summary
