@@ -75,13 +75,3 @@ jobs:
               }
               page++;
             }
-
-      - name: 📝 Deleted versions summary
-        run: |
-          echo "### 🗑️ Deleted versions for ${{ matrix.service }}" >> "$GITHUB_STEP_SUMMARY"
-          deleted="${{ steps.cleanup.outputs.deleted }}"
-          if [ -z "$deleted" ]; then
-            echo "- ✨ **None deleted** ✨" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "$deleted" | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
-          fi
