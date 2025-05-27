@@ -16,8 +16,8 @@ jobs:
   build:
     name: 🏗️ Build & push ${{ matrix.image_suffix }}
     runs-on: large-runner-ubuntu
-
     strategy:
+      fail-fast: false
       matrix:
         include:
           - service: baseline_model
