@@ -21,7 +21,7 @@ RUN apt-get update \
 
 # Add user to image
 RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" && \
-    useradd -m -u "${USER_ID}" -l "${USER_NAME}" -G "${GROUP_NAME}" &&
+    useradd -m -u "${USER_ID}" -l "${USER_NAME}" -G "${GROUP_NAME}"
 
 # Copy working dir to clone the git repo inside
 COPY ./diffusers /diffusers

@@ -28,7 +28,7 @@ USER "${USER_NAME}":"${GROUP_NAME}"
 
 # Install python packages
 COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./requirements_deepf.txt /requirements_deepf.txt
-RUN pip install --user --upgrade pip\
+RUN pip install --user --upgrade pip && \
     pip install --user --default-timeout=100 --no-cache-dir -r /requirements_deepf.txt
 
 # COPY --chown="${USER_NAME}":"${GROUP_NAME}" entrypoint.sh /entrypoint.sh
