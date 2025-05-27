@@ -34,7 +34,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: 🚀 Build & push baseline image
-        uses: docker/build-push-action@v6
+        uses: docker/bake-action@v6
         env:
           # Tag depends on the trigger that called this workflow [ manual | merge | release ]
           #   manual  ->  <image-name>:<ref-hash>
@@ -43,13 +43,12 @@ jobs:
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           IMAGE_NAME_BASELINE: ${{ steps.get-image-name.outputs.name }}/baseline
         with:
-          context: .
-          file: docker-compose.yml # build using your Compose file
-          services: baseline_model # target service
-          push: true # push directly to registry
-          tags: ${{ steps.get-image-name.outputs.name }}/baseline:${{ env.IMAGE_TAG }}
-          cache-from: type=gha,scope=baseline
-          cache-to: type=gha,scope=baseline,mode=max
+          source: .
+          push: true
+          # Only build/push the 'baseline_model' target
+          targets: baseline_model
+          set: |
+            *.tags=ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}/baseline:${{ github.sha }}
 
       - name: 📜 Summary
         run: |
