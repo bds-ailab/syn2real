@@ -6,7 +6,7 @@ on:
   workflow_dispatch: # Manual trigger
 
 permissions:
-  packages: delete # nécessaire pour supprimer des versions
+  packages: write
   contents: read
 
 jobs:
