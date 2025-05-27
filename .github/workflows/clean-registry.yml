@@ -18,76 +18,68 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // ① Destructure owner & repo from context
+            // ① Destructure owner & repo
             const { owner, repo } = context.repo;
+            const prefix         = `${repo}/`;
 
-            // ② Prefix = "<repo>/" to target only packages under this repository
-            const prefix = `${repo}/`;
-
-            // ③ Flexible SemVer (leading "v", optional minor/patch, prerelease/build)
+            // ② Flexible SemVer regex
             const semver = /^v?(0|[1-9]\d*)(\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
-            // 1️⃣ List all container packages for this repo
-            let pkgPage  = 1;
-            const pkgNames = [];
-            while (true) {
-              const { data: pkgs } = await github.request(
-                'GET /repos/{owner}/{repo}/packages',
-                {
-                  owner, repo,
-                  package_type: 'container',
-                  per_page: 100,
-                  page: pkgPage
+            // ③ Dynamically fetch all CONTAINER packages in the org via GraphQL
+            let pkgNames = [];
+            let cursor    = null;
+            do {
+              const q = await github.graphql(`
+                query($org: String!, $after: String) {
+                  organization(login: $org) {
+                    packages(first: 100, after: $after, types: CONTAINER) {
+                      pageInfo { endCursor, hasNextPage }
+                      nodes { name }
+                    }
+                  }
                 }
-              );
-              if (!pkgs.length) break;
+              `, { org: owner, after: cursor });
 
-              // Filter to names starting with "<repo>/…"
-              for (const p of pkgs) {
-                if (p.name.startsWith(prefix)) {
-                  pkgNames.push(p.name);
-                }
-              }
-              pkgPage++;
-            }
+              const pkgs = q.organization.packages.nodes.map(p => p.name);
+              pkgNames.push(...pkgs);
+              cursor = q.organization.packages.pageInfo.endCursor;
+              hasNext = q.organization.packages.pageInfo.hasNextPage;
+            } while (hasNext);
 
-            // 2️⃣ For each package, purge non-SemVer & non-main versions
-            for (const pkgName of pkgNames) {
-              let verPage = 1;
+            // ④ Filter to packages under "<repo>/…"
+            pkgNames = pkgNames.filter(name => name.startsWith(prefix));
+
+            // ⑤ For each pkg, delete non-SemVer & non-main versions
+            for (const pkg of pkgNames) {
+              let page = 1;
               while (true) {
                 const { data: versions } = await github.request(
                   'GET /orgs/{org}/packages/{package_type}/{package_name}/versions',
                   {
                     org: owner,
                     package_type: 'container',
-                    package_name: pkgName,
+                    package_name: pkg,
                     per_page: 100,
-                    page: verPage
+                    page
                   }
                 );
                 if (!versions.length) break;
 
                 for (const v of versions) {
                   const tags = v.metadata.container.tags || [];
-
-                  // Keep if any tag matches SemVer or is literally "main"
-                  if (tags.some(t => semver.test(t) || t === 'main')) {
-                    continue;
-                  }
-
-                  // Otherwise delete the version
+                  if (tags.some(t => semver.test(t) || t === 'main')) continue;
                   await github.request(
                     'DELETE /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}',
                     {
                       org: owner,
                       package_type: 'container',
-                      package_name: pkgName,
+                      package_name: pkg,
                       package_version_id: v.id
                     }
                   );
-                  console.log(`Deleted ${pkgName}@${v.id} (tags: ${tags.join(', ')})`);
+                  console.log(`Deleted ${pkg}@${v.id} (tags: ${tags.join(', ')})`);
                 }
-                verPage++;
+                page++;
               }
             }
 
