@@ -34,7 +34,6 @@ jobs:
                 {
                   org: owner,
                   package_type: 'container',
-                  per_page: 100,
                   page: pkgPage
                 }
               );
@@ -56,7 +55,6 @@ jobs:
                     org: owner,
                     package_type: 'container',
                     package_name: pkgName,
-                    per_page: 100,
                     page: verPage
                   }
                 );
