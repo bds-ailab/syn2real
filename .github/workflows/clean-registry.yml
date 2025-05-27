@@ -1,4 +1,4 @@
-name: 🧹 Docker registry weekly clean-Up
+name: 🧹 Docker registry weekly clean-up
 
 on:
   schedule:
@@ -20,6 +20,12 @@ jobs:
           script: |
             const org    = context.repo.owner;
             const pkg    = 'MY_PACKAGE_NAME';    // Replace with your container package name
+
+            // SemVer regex:
+            //  • optional leading “v”  
+            //  • major required, minor & patch optional  
+            //  • optional prerelease (-…) and build metadata (+…)  
+
             const semver = /^v?(0|[1-9]\d*)(?:\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
             let page = 1;
@@ -54,3 +60,11 @@ jobs:
 
               page++;
             }
+
+      - name: 📝 Cleanup job summary
+        run: |
+          echo "### 🧹 Docker registry cleanup summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "- ✅ Kept tags matching **flexible SemVer** (optional leading 'v', optional minor/patch, prerelease/build-metadata)" \
+               >> "$GITHUB_STEP_SUMMARY"
+          echo "- ✅ Preserved any version tagged **main**" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 🗑️  Deleted all other container versions" >> "$GITHUB_STEP_SUMMARY"
