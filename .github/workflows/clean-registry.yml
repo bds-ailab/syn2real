@@ -1,13 +1,6 @@
-name: 🧹 Docker registry weekly clean-Up
-
-on:
-  schedule:
-    - cron: '0 0 * * 0' # Every Sunday at 00:00 UTC
-  workflow_dispatch: # Manual trigger
-
 permissions:
-  packages: write # <-- must be write to remove versions
-  contents: read # needed if listing repository contents
+  packages: delete # nécessaire pour supprimer des versions
+  contents: read
 
 jobs:
   cleanup:
@@ -34,11 +27,13 @@ jobs:
 
       - name: 🧹 Clean up images for ${{ matrix.service }}
         uses: actions/github-script@v7
+        env:
+          SERVICE: ${{ matrix.service }} # ← on expose la valeur ici
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { owner, repo } = context.repo;
-            const pkgName         = `${repo}/${matrix.service}`;
+            const pkgName         = `${repo}/${process.env.SERVICE}`;
 
             // Flexible SemVer: optional "v", optional minor/patch, prerelease/build
             const semver = /^v?(0|[1-9]\d*)(\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
