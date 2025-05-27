@@ -22,8 +22,11 @@ jobs:
             // Target packages under "<repo>/…"
             const prefix = `${repo}/`
 
-            // Flexible SemVer: optional leading “v”, optional minor/patch, prerelease/build
-            const semver = /^v?(0|[1-9]\d*)?:\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/x
+            // Flexible SemVer regex (single-line, no unsupported flags):
+            //  • optional leading "v"
+            //  • major required; minor & patch optional
+            //  • optional prerelease (-...) and build metadata (+...)
+            const semver = /^v?(0|[1-9]\d*)(\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
             // 1️⃣ List all container packages, filter by prefix
             let pkgPage = 1
