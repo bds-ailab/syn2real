@@ -6,7 +6,8 @@ on:
   workflow_dispatch: # Manual trigger
 
 permissions:
-  packages: write # Needed to delete versions
+  packages: write # <-- must be 'delete' to remove versions
+  contents: read # needed if listing repository contents
 
 jobs:
   cleanup:
