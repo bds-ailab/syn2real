@@ -45,6 +45,8 @@ jobs:
               pkgPage++;
             }
 
+            console.log(pkgNames);
+
             // 2️⃣ For each package, purge non‐SemVer & non‐main versions
             for (const pkgName of pkgNames) {
               let verPage = 1;
