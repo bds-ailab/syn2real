@@ -20,7 +20,7 @@ jobs:
           script: |
             // ① Destructure owner & repo
             const { owner, repo } = context.repo;
-            const prefix         = `${repo}/`;
+            const prefix          = `${repo}/`;
 
             // ② Flexible SemVer regex
             const semver = /^v?(0|[1-9]\d*)(\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
