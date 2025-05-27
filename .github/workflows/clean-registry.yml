@@ -20,7 +20,7 @@ jobs:
           script: |
             const org    = context.repo.owner
             // Target packages under "<repo>/…"
-            const prefix = `${repo}/`
+            const prefix = `context.repo.repo/`
 
             // Flexible SemVer regex (single-line, no unsupported flags):
             //  • optional leading "v"
