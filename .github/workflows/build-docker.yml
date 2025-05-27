@@ -13,7 +13,7 @@ env:
 jobs:
   build:
     name: 🏗️ Build the image
-    runs-on: ubuntu-latest
+    runs-on: large-runner-ubuntu
     steps:
       - name: 📁 Checkout
         uses: actions/checkout@v3
@@ -25,15 +25,6 @@ jobs:
 
       - name: 🐳 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: 🧹 Free some space for docker
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf "/usr/local/share/boost"
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          sudo docker image prune --all --force
-          sudo docker builder prune -a
 
       - name: 🏗️ Build the image
         id: build
