@@ -13,73 +13,73 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🧹 List & delete outdated versions for all ${GITHUB_REPOSITORY#*/}/* packages
+      - name: 🧹 Dynamic cleanup of container packages
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             // ① Destructure owner & repo
             const { owner, repo } = context.repo;
-            const prefix          = `${repo}/`;
+            const prefix         = `${repo}/`;  
 
-            // ② Flexible SemVer regex
+            // ② Flexible SemVer regex:
+            //    - optional leading "v"
+            //    - major required, minor & patch optional
+            //    - optional prerelease (-…) and build metadata (+…)
             const semver = /^v?(0|[1-9]\d*)(\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
-            // ③ Dynamically fetch all CONTAINER packages in the org via GraphQL
-            let pkgNames = [];
-            let cursor    = null;
-            do {
-              const q = await github.graphql(`
-                query($org: String!, $after: String) {
-                  organization(login: $org) {
-                    packages(first: 100, after: $after, types: CONTAINER) {
-                      pageInfo { endCursor, hasNextPage }
-                      nodes { name }
-                    }
-                  }
-                }
-              `, { org: owner, after: cursor });
+            // 1️⃣ List all org packages (no package_type filter)
+            let pkgPage  = 1;
+            const allPkgs = [];
+            while (true) {
+              const { data: pkgs } = await github.request(
+                'GET /orgs/{org}/packages',
+                { org: owner, per_page: 100, page: pkgPage }
+              );
+              if (!pkgs.length) break;
+              allPkgs.push(...pkgs);
+              pkgPage++;
+            }
 
-              const pkgs = q.organization.packages.nodes.map(p => p.name);
-              pkgNames.push(...pkgs);
-              cursor = q.organization.packages.pageInfo.endCursor;
-              hasNext = q.organization.packages.pageInfo.hasNextPage;
-            } while (hasNext);
+            // 2️⃣ Filter to container packages under "<repo>/…"
+            const containerPkgs = allPkgs
+              .filter(p => p.package_type === 'container' && p.name.startsWith(prefix))
+              .map(p => p.name);
 
-            // ④ Filter to packages under "<repo>/…"
-            pkgNames = pkgNames.filter(name => name.startsWith(prefix));
-
-            // ⑤ For each pkg, delete non-SemVer & non-main versions
-            for (const pkg of pkgNames) {
-              let page = 1;
+            // 3️⃣ For each container package, delete non‐SemVer & non‐main versions
+            for (const pkgName of containerPkgs) {
+              let verPage = 1;
               while (true) {
                 const { data: versions } = await github.request(
                   'GET /orgs/{org}/packages/{package_type}/{package_name}/versions',
                   {
                     org: owner,
                     package_type: 'container',
-                    package_name: pkg,
+                    package_name: pkgName,
                     per_page: 100,
-                    page
+                    page: verPage
                   }
                 );
                 if (!versions.length) break;
 
                 for (const v of versions) {
                   const tags = v.metadata.container.tags || [];
+                  // Keep if any tag matches semver or is "main"
                   if (tags.some(t => semver.test(t) || t === 'main')) continue;
+                  // Otherwise delete
                   await github.request(
                     'DELETE /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}',
                     {
                       org: owner,
                       package_type: 'container',
-                      package_name: pkg,
+                      package_name: pkgName,
                       package_version_id: v.id
                     }
                   );
-                  console.log(`Deleted ${pkg}@${v.id} (tags: ${tags.join(', ')})`);
+                  console.log(`Deleted ${pkgName}@${v.id} (tags: ${tags.join(', ')})`);
                 }
-                page++;
+
+                verPage++;
               }
             }
 
