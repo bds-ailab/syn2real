@@ -18,42 +18,44 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const org    = context.repo.owner;
-            const pkg    = 'MY_PACKAGE_NAME';    // Replace with your container package name
+            const org = context.repo.owner;
+            const pkg = 'MY_PACKAGE_NAME';    // ← replace with your package name
 
-            // SemVer regex:
-            //  • optional leading “v”  
-            //  • major required, minor & patch optional  
-            //  • optional prerelease (-…) and build metadata (+…)  
-
+            // same flexible SemVer regex as before
             const semver = /^v?(0|[1-9]\d*)(?:\.(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
             let page = 1;
-
             while (true) {
-              const { data: versions } = await github.rest.packages.listPackageVersionsForOrg({
-                package_type: 'container',
-                package_name: pkg,
-                org,
-                per_page: 100,
-                page
-              });
+              // LIST versions via raw REST call
+              const { data: versions } = await github.request(
+                'GET /orgs/{org}/packages/{package_type}/{package_name}/versions',
+                {
+                  org,
+                  package_type: 'container',
+                  package_name: pkg,
+                  per_page: 100,
+                  page
+                }
+              );
 
               if (versions.length === 0) break;
 
               for (const v of versions) {
                 const tags = v.metadata.container.tags || [];
 
-                // Keep if any tag is SemVer or 'main'
+                // skip if any tag is SemVer or "main"
                 if (tags.some(t => semver.test(t) || t === 'main')) continue;
 
-                // Delete all others
-                await github.rest.packages.deletePackageVersionForOrg({
-                  package_type: 'container',
-                  package_name: pkg,
-                  org,
-                  package_version_id: v.id
-                });
+                // DELETE the version via raw REST call
+                await github.request(
+                  'DELETE /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}',
+                  {
+                    org,
+                    package_type: 'container',
+                    package_name: pkg,
+                    package_version_id: v.id
+                  }
+                );
 
                 console.log(`Deleted version ${v.id} (tags: ${tags.join(', ')})`);
               }
