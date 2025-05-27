@@ -18,36 +18,36 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // ① Destructure owner & repo
+            // ① Destructure org and repo
             const { owner, repo } = context.repo;
-            const prefix         = `${repo}/`;  
+            const prefix          = `${repo}/`;
 
-            // ② Flexible SemVer regex:
-            //    - optional leading "v"
-            //    - major required, minor & patch optional
-            //    - optional prerelease (-…) and build metadata (+…)
+            // ② Flexible SemVer: optional "v", optional minor/patch, prerelease/build
             const semver = /^v?(0|[1-9]\d*)(\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
-            // 1️⃣ List all org packages (no package_type filter)
-            let pkgPage  = 1;
-            const allPkgs = [];
+            // 1️⃣ List all container packages (paginated)
+            let pkgPage = 1;
+            const pkgNames = [];
             while (true) {
               const { data: pkgs } = await github.request(
                 'GET /orgs/{org}/packages',
-                { org: owner, per_page: 100, page: pkgPage }
+                {
+                  org: owner,
+                  package_type: 'container',
+                  per_page: 100,
+                  page: pkgPage
+                }
               );
               if (!pkgs.length) break;
-              allPkgs.push(...pkgs);
+              // Filter to "<repo>/…" names
+              pkgs
+                .filter(p => p.name.startsWith(prefix))
+                .forEach(p => pkgNames.push(p.name));
               pkgPage++;
             }
 
-            // 2️⃣ Filter to container packages under "<repo>/…"
-            const containerPkgs = allPkgs
-              .filter(p => p.package_type === 'container' && p.name.startsWith(prefix))
-              .map(p => p.name);
-
-            // 3️⃣ For each container package, delete non‐SemVer & non‐main versions
-            for (const pkgName of containerPkgs) {
+            // 2️⃣ For each package, purge non‐SemVer & non‐main versions
+            for (const pkgName of pkgNames) {
               let verPage = 1;
               while (true) {
                 const { data: versions } = await github.request(
@@ -61,10 +61,9 @@ jobs:
                   }
                 );
                 if (!versions.length) break;
-
                 for (const v of versions) {
                   const tags = v.metadata.container.tags || [];
-                  // Keep if any tag matches semver or is "main"
+                  // Keep if any tag is SemVer or 'main'
                   if (tags.some(t => semver.test(t) || t === 'main')) continue;
                   // Otherwise delete
                   await github.request(
@@ -78,7 +77,6 @@ jobs:
                   );
                   console.log(`Deleted ${pkgName}@${v.id} (tags: ${tags.join(', ')})`);
                 }
-
                 verPage++;
               }
             }
