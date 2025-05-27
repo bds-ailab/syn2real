@@ -3,7 +3,6 @@ run-name: 🏗️ Build and store version ${{ (github.event_name == 'push' || gi
 
 on:
   release:
-    types: [prereleased]
   push:
     branches: [main]
   workflow_dispatch:
