@@ -1,56 +1,77 @@
-name: 🧹 Docker registry weekly clean-up
+name: 🧹 Docker registry weekly clean-Up
 
 on:
   schedule:
     - cron: '0 0 * * 0' # Every Sunday at 00:00 UTC
-  workflow_dispatch:
+  workflow_dispatch: # Manual trigger
 
 permissions:
-  packages: write # Allow deleting package versions
+  packages: write # Needed to delete versions
 
 jobs:
   cleanup:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - baseline
+          - controlnet
+          - blip
+          - mlflow
+          - deepfloyd
+          - sdxl
+          - eval
+          - gan
 
     steps:
-      - name: 🧹 Dynamic cleanup of container packages
+      - name: 🐳 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔒 Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🧹 Clean up images for ${{ matrix.service }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // ① Destructure org and repo
             const { owner, repo } = context.repo;
-            const prefix          = `${repo}/`;
+            const pkgName         = `${repo}/${matrix.service}`;
 
-            // ② Flexible SemVer: optional "v", optional minor/patch, prerelease/build
+            // Flexible SemVer: optional "v", optional minor/patch, prerelease/build
             const semver = /^v?(0|[1-9]\d*)(\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
-            // 1️⃣ List all container packages (paginated)
-            let pkgPage = 1;
-            const pkgNames = [];
+            let page = 1;
             while (true) {
-              const { data: pkgs } = await github.request(
-                'GET /orgs/{org}/packages',
+              const { data: versions } = await github.request(
+                'GET /orgs/{org}/packages/{package_type}/{package_name}/versions',
                 {
                   org: owner,
                   package_type: 'container',
-                  page: pkgPage
+                  package_name: pkgName,
+                  per_page: 100,
+                  page
                 }
               );
-              if (!pkgs.length) break;
-              // Filter to "<repo>/…" names
-              pkgs
-                .filter(p => p.name.startsWith(prefix))
-                .forEach(p => pkgNames.push(p.name));
-              pkgPage++;
+              if (!versions.length) break;
+
+              for (const v of versions) {
+                const tags = v.metadata.container.tags || [];
+                if (tags.some(t => semver.test(t) || t === 'main')) continue;
+                await github.request(
+                  'DELETE /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}',
+                  {
+                    org: owner,
+                    package_type: 'container',
+                    package_name: pkgName,
+                    package_version_id: v.id
+                  }
+                );
+                console.log(`Deleted ${pkgName}@${v.id} (tags: ${tags.join(', ')})`);
+              }
+              page++;
             }
-
-            console.log(pkgNames);
-
-      - name: 📝 Cleanup job summary
-        run: |
-          echo "### 🧹 Docker registry cleanup summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "- ✅ Kept tags matching **flexible SemVer** (optional leading 'v', optional minor/patch, prerelease/build-metadata)" \
-               >> "$GITHUB_STEP_SUMMARY"
-          echo "- ✅ Preserved any version tagged **main**" >> "$GITHUB_STEP_SUMMARY"
-          echo "- 🗑️  Deleted all other container versions" >> "$GITHUB_STEP_SUMMARY"
