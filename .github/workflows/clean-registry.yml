@@ -47,40 +47,6 @@ jobs:
 
             console.log(pkgNames);
 
-            // 2️⃣ For each package, purge non‐SemVer & non‐main versions
-            for (const pkgName of pkgNames) {
-              let verPage = 1;
-              while (true) {
-                const { data: versions } = await github.request(
-                  'GET /orgs/{org}/packages/{package_type}/{package_name}/versions',
-                  {
-                    org: owner,
-                    package_type: 'container',
-                    package_name: pkgName,
-                    page: verPage
-                  }
-                );
-                if (!versions.length) break;
-                for (const v of versions) {
-                  const tags = v.metadata.container.tags || [];
-                  // Keep if any tag is SemVer or 'main'
-                  if (tags.some(t => semver.test(t) || t === 'main')) continue;
-                  // Otherwise delete
-                  await github.request(
-                    'DELETE /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}',
-                    {
-                      org: owner,
-                      package_type: 'container',
-                      package_name: pkgName,
-                      package_version_id: v.id
-                    }
-                  );
-                  console.log(`Deleted ${pkgName}@${v.id} (tags: ${tags.join(', ')})`);
-                }
-                verPage++;
-              }
-            }
-
       - name: 📝 Cleanup job summary
         run: |
           echo "### 🧹 Docker registry cleanup summary" >> "$GITHUB_STEP_SUMMARY"
