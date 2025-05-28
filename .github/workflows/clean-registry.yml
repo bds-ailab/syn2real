@@ -17,12 +17,12 @@ jobs:
       matrix:
         service:
           - baseline
-          # - controlnet
+          - controlnet
           - blip
           - mlflow
           - deepfloyd
           - sdxl
-          # - eval
+          - eval
           - gan
 
     steps:
