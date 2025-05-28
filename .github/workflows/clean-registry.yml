@@ -16,12 +16,12 @@ jobs:
       matrix:
         service:
           - baseline
-          - controlnet
+          # - controlnet
           - blip
           - mlflow
           - deepfloyd
           - sdxl
-          - eval
+          # - eval
           - gan
 
     steps:
@@ -33,19 +33,23 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧹 Clean up images for ${{ matrix.service }}
+        id: cleanup
         uses: actions/github-script@v7
         env:
-          SERVICE: ${{ matrix.service }} # ← on expose la valeur ici
+          SERVICE: ${{ matrix.service }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const core = require('@actions/core');
             const { owner, repo } = context.repo;
-            const pkgName         = `${repo}/${process.env.SERVICE}`;
+            const pkgName = `${repo}/${process.env.SERVICE}`;
 
             // Flexible SemVer: optional "v", optional minor/patch, prerelease/build
             const semver = /^v?(0|[1-9]\d*)(\.(0|[1-9]\d*)(\.(0|[1-9]\d*))?)?(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
             let page = 1;
+            const deleted = [];
+
             while (true) {
               const { data: versions } = await github.request(
                 'GET /orgs/{org}/packages/{package_type}/{package_name}/versions',
@@ -71,7 +75,42 @@ jobs:
                     package_version_id: v.id
                   }
                 );
-                console.log(`Deleted ${pkgName}@${v.id} (tags: ${tags.join(', ')})`);
+                deleted.push(`${pkgName}@${v.id} (${tags.join(', ')})`);
               }
               page++;
             }
+
+            core.setOutput('deleted', deleted.join('\n'));
+
+      - name: Save deleted entries to file
+        run: |
+          echo "${{ steps.cleanup.outputs.deleted }}" > deleted.txt
+
+      - name: 📦 Upload deleted entries
+        uses: actions/upload-artifact@v3
+        with:
+          name: deleted-entries-${{ matrix.service }}
+          path: deleted.txt
+
+  aggregate-summary:
+    needs: cleanup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Download all deleted‐entries artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: deleted_entries
+
+      - name: 📝 Weekly cleanup aggregate summary
+        run: |
+          echo "## 🗑️ Weekly Cleanup Aggregate Summary" >> "$GITHUB_STEP_SUMMARY"
+
+          # concat all deleted.txt files
+          all=$(find deleted_entries -type f -exec cat {} +)
+
+          if [ -z "$all" ]; then
+            echo "- ✨ **No images deleted this week** ✨" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "$all" | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
+          fi
