@@ -1,4 +1,4 @@
-name: 🧹 Docker registry weekly clean-Up
+name: 🧹 Docker registry weekly cleanup
 
 on:
   schedule:
@@ -95,22 +95,37 @@ jobs:
   aggregate-summary:
     needs: cleanup
     runs-on: ubuntu-latest
-    name: 📝 Aggregate summary
+    name: 📝 Aggregated results
     steps:
       - name: 📥 Download all deleted‐entries artifacts
         uses: actions/download-artifact@v4
         with:
           path: deleted_entries
 
-      - name: 📝 Weekly cleanup aggregate summary
+      - name: 📝 Cleanup summary
         run: |
-          echo "## 🗑️ Weekly Cleanup Aggregate Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "## 🗑️ Cleanup Summary" >> "$GITHUB_STEP_SUMMARY"
 
-          # concat all deleted.txt files
-          all=$(find deleted_entries -type f -exec cat {} +)
+          # Combine all deleted entries into one list
+          all=$(find deleted_entries -type f -name 'deleted.txt' -exec cat {} +)
 
           if [ -z "$all" ]; then
-            echo "✨ **No images deleted** ✨" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "$all" | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
+            echo "✨ **No images deleted this week** ✨" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
+
+          # Group by service
+          echo "$all" | awk -F'@' '
+            {
+              # split "repo/service@id (tags)" on "@"
+              svc_version=$2
+              split($0, a, "@"); svc=a[1]
+              # gather lines per service
+              lines[svc] = lines[svc] "\n- **" svc_version
+            }
+            END {
+              for (s in lines) {
+                print "\n### " s lines[s] "\n"
+              }
+            }
+          ' >> "$GITHUB_STEP_SUMMARY"
