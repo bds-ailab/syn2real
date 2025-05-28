@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   cleanup:
+    name: 🧹 Clean up registry
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -94,7 +95,7 @@ jobs:
   aggregate-summary:
     needs: cleanup
     runs-on: ubuntu-latest
-
+    name: 📝 Aggregate summary
     steps:
       - name: 📥 Download all deleted‐entries artifacts
         uses: actions/download-artifact@v4
@@ -109,7 +110,7 @@ jobs:
           all=$(find deleted_entries -type f -exec cat {} +)
 
           if [ -z "$all" ]; then
-            echo "- ✨ **No images deleted this week** ✨" >> "$GITHUB_STEP_SUMMARY"
+            echo "✨ **No images deleted** ✨" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "$all" | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
           fi
