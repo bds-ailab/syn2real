@@ -136,6 +136,11 @@ class MyClass:
     
 
 ```
+## Transfer of Ownership
+
+By contributing to this project, you agree to transfer **all intellectual property rights** related to the code you submit. This means the project becomes the owner of the code you add, and you waive any future claims of ownership. This transfer is essential to ensure the project can evolve freely and be used by the community without restrictions.
+
+Thank you for your understanding and valuable contribution!
 
 ## Asking a question
 
