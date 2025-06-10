@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "mlflow"
+version = "0.1.0"
+description = "MLFlow image to log experiments on MLFlow"
+authors = ["Anaïs Druart <anais.druart@atos.net>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"  
+numpy = "~1.26.4"
+pillow = "~10.3.0"
+matplotlib = "~3.8.4"
+pandas = "~2.2.2"
+mlflow = "~2.14.2"
+pyyaml = "~6.0.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
