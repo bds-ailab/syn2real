@@ -27,9 +27,9 @@ RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" \
 USER "${USER_NAME}":"${GROUP_NAME}"
 
 # Install python packages
-COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./requirements_deepf.txt /requirements_deepf.txt
+COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./pyproject_deepf.toml /pyproject_deepf.toml
 RUN pip install --user --upgrade pip && \
-    pip install --user --default-timeout=100 --no-cache-dir -r /requirements_deepf.txt
+    pip install --user --default-timeout=100 --no-cache-dir -r /pyproject_deepf.toml
 
 # COPY --chown="${USER_NAME}":"${GROUP_NAME}" entrypoint.sh /entrypoint.sh
 

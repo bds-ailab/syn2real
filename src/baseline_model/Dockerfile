@@ -20,6 +20,7 @@ RUN apt-get update \
     curl \
     unzip \
     sudo \
+    python3-venv \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -34,6 +35,8 @@ RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" \
 USER "${USER_NAME}":"${GROUP_NAME}"
 
 # Install python packages
-COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./requirements_baseline.txt /requirements_baseline.txt
-RUN pip install --user --upgrade pip && \
-    pip install --user --default-timeout=100 --no-cache-dir -r /requirements_baseline.txt
+COPY --chown="${USER_NAME}":"${GROUP_NAME}" pyproject_baseline.toml poetry.lock ./
+RUN python3 -m venv .venv && \
+. .venv/bin/activate && \
+pip install --no-cache-dir poetry && \
+poetry install
