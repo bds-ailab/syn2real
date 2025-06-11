@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "controlnet_sdxl"
+version = "0.1.0"
+description = "Finetune the controlnet model"
+authors = ["Anaïs Druart <anais.druart@atos.net>"]
+
+[tool.poetry.dependencies]
+python = "^3.8" 
+bitsandbytes = "~0.43.1"
+opencv-contrib-python = "~4.9.0"
+mlflow = "~2.14.2"
+umap-learn = "~0.5.6"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
