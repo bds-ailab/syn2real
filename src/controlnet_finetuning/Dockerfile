@@ -37,6 +37,7 @@ RUN curl -L https://github.com/lllyasviel/ControlNet/archive/refs/heads/main.zip
     && rm /ControlNet/controlnet.zip
 
 # Install python packages
+# hadolint ignore=DL3013,SC1091
 COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./pyproject_controlnet.toml /pyproject_controlnet.toml
 RUN pip install --user --upgrade pip && \
     pip install --user --default-timeout=100 --no-cache-dir -r /pyproject_controlnet.toml

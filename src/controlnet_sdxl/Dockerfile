@@ -29,6 +29,7 @@ COPY ./pyproject_controlnet_sdxl.toml /pyproject_controlnet_sdxl.toml
 RUN rm /diffusers/README.md
 
 # Install python packages
+# hadolint ignore=DL3013,SC1091
 RUN pip --no-cache-dir install --upgrade pip\
     && git clone https://github.com/huggingface/diffusers /diffusers/\
     && pip install --no-cache-dir -e /diffusers/.\

@@ -10,12 +10,12 @@ ARG GROUP_ID
 # hadolint ignore=DL3008
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --fix-missing \
+    curl \
+    git \
     libgl1-mesa-glx \
     libglib2.0-0 \
-    git \
-    curl \
-    unzip \
     sudo \
+    unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -27,6 +27,7 @@ RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" \
 USER "${USER_NAME}":"${GROUP_NAME}"
 
 # Install python packages
+# hadolint ignore=DL3013,SC1091
 COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./pyproject_mlflow.toml /pyproject_mlflow.toml
 RUN pip install --user --upgrade pip && \
     pip install --user --default-timeout=100 --no-cache-dir -r /pyproject_mlflow.toml

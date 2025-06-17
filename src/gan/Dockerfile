@@ -25,6 +25,7 @@ RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" && \
 
 COPY ./pyproject_gan.toml /pyproject_gan.toml
 
+# hadolint ignore=DL3013,SC1091
 RUN pip --no-cache-dir install --upgrade pip\
     && pip install --no-cache-dir --requirement /pyproject_gan.toml
 
