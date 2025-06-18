@@ -24,8 +24,6 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy src code
-COPY ./* /baseline_model/
 
 # hadolint ignore=DL3046
 RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" \
@@ -35,7 +33,9 @@ RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" \
 USER "${USER_NAME}":"${GROUP_NAME}"
 
 # Install python packages
-COPY --chown="${USER_NAME}":"${GROUP_NAME}" pyproject_baseline.toml poetry.lock ./
+# Copy src code
+COPY ./* /baseline_model/
+COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./pyproject_baseline.toml ./pyproject_baseline.toml
 # hadolint ignore=DL3013,SC1091
 RUN python3 -m venv .venv && \
     . .venv/bin/activate && \
