@@ -34,7 +34,7 @@ USER "${USER_NAME}":"${GROUP_NAME}"
 
 # Install python packages
 # Copy src code
-COPY ./* /baseline_model/
+COPY ../baseline_model/ /baseline_model/
 COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./pyproject_baseline.toml /pyproject_baseline.toml
 # hadolint ignore=DL3013,SC1091
 RUN python3 -m venv .venv && \
