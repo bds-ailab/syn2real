@@ -29,8 +29,10 @@ USER "${USER_NAME}":"${GROUP_NAME}"
 # Install python packages
 COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./pyproject_deepf.toml /pyproject_deepf.toml
 # hadolint ignore=DL3013,SC1091
-RUN pip install --user --upgrade pip && \
-    pip install --user --default-timeout=100 --no-cache-dir -r /pyproject_deepf.toml
+RUN python3 -m venv .venv && \
+    . .venv/bin/activate && \
+    pip install --no-cache-dir poetry && \
+    poetry install
 
 # COPY --chown="${USER_NAME}":"${GROUP_NAME}" entrypoint.sh /entrypoint.sh
 

@@ -39,7 +39,9 @@ RUN curl -L https://github.com/lllyasviel/ControlNet/archive/refs/heads/main.zip
 # Install python packages
 COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./pyproject_controlnet.toml /pyproject_controlnet.toml
 # hadolint ignore=DL3013,SC1091
-RUN pip install --user --upgrade pip && \
-    pip install --user --default-timeout=100 --no-cache-dir -r /pyproject_controlnet.toml
+RUN python3 -m venv .venv && \
+    . .venv/bin/activate && \
+    pip install --no-cache-dir poetry && \
+    poetry install
 
 # COPY --chown="${USER_NAME}":"${GROUP_NAME}" entrypoint.sh /entrypoint.sh

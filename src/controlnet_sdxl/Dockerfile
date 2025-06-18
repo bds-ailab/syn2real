@@ -34,9 +34,13 @@ RUN pip --no-cache-dir install --upgrade pip\
     && git clone https://github.com/huggingface/diffusers /diffusers/\
     && pip install --no-cache-dir -e /diffusers/.\
     && pip install --no-cache-dir -r /diffusers/examples/controlnet/requirements_sdxl.txt\
-    && pip install --no-cache-dir -r /pyproject_controlnet_sdxl.toml\
     && pip install git+https://github.com/facebookresearch/segment-anything.git\
     && pip install opencv-python pycocotools matplotlib onnxruntime onnx 
+
+RUN python3 -m venv .venv && \
+    . .venv/bin/activate && \
+    pip install --no-cache-dir poetry && \
+    poetry install
 
 # Copy source code
 USER "${USER_NAME}":"${GROUP_NAME}"

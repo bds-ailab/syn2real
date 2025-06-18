@@ -38,6 +38,6 @@ USER "${USER_NAME}":"${GROUP_NAME}"
 COPY --chown="${USER_NAME}":"${GROUP_NAME}" pyproject_baseline.toml poetry.lock ./
 # hadolint ignore=DL3013,SC1091
 RUN python3 -m venv .venv && \
-. .venv/bin/activate && \
-pip install --no-cache-dir poetry && \
-poetry install
+    . .venv/bin/activate && \
+    pip install --no-cache-dir poetry && \
+    poetry install
