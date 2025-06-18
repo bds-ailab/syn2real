@@ -27,8 +27,8 @@ RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" \
 USER "${USER_NAME}":"${GROUP_NAME}"
 
 # Install python packages
-# hadolint ignore=DL3013,SC1091
 COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./pyproject_blip.toml /pyproject_blip.toml
+# hadolint ignore=DL3013,SC1091
 RUN pip install --user --upgrade pip && \
     pip install --user --default-timeout=100 --no-cache-dir -r /pyproject_blip.toml
 

@@ -35,8 +35,8 @@ RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" \
 USER "${USER_NAME}":"${GROUP_NAME}"
 
 # Install python packages
-# hadolint ignore=DL3013,SC1091
 COPY --chown="${USER_NAME}":"${GROUP_NAME}" pyproject_baseline.toml poetry.lock ./
+# hadolint ignore=DL3013,SC1091
 RUN python3 -m venv .venv && \
 . .venv/bin/activate && \
 pip install --no-cache-dir poetry && \
