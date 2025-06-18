@@ -10,12 +10,12 @@ ARG USER_NAME
 # hadolint ignore=DL3008
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --fix-missing \
+    curl \
+    git \
     libgl1-mesa-glx \
     libglib2.0-0 \
-    git \
-    curl \
-    unzip \
     sudo \
+    unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -29,14 +29,15 @@ COPY ./pyproject_controlnet_sdxl.toml /pyproject_controlnet_sdxl.toml
 RUN rm /diffusers/README.md
 
 # Install python packages
-# hadolint ignore=DL3013,SC1091
-RUN pip --no-cache-dir install --upgrade pip\
+# hadolint ignore=DL3013,SC1091, DL3013
+RUN pip install --user --upgrade pip\
     && git clone https://github.com/huggingface/diffusers /diffusers/\
     && pip install --no-cache-dir -e /diffusers/.\
     && pip install --no-cache-dir -r /diffusers/examples/controlnet/requirements_sdxl.txt\
     && pip install git+https://github.com/facebookresearch/segment-anything.git\
     && pip install opencv-python pycocotools matplotlib onnxruntime onnx 
 
+# hadolint ignore=DL3013, SC1091
 RUN python3 -m venv .venv && \
     . .venv/bin/activate && \
     pip install --no-cache-dir poetry && \
