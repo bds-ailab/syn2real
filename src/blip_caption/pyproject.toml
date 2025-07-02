@@ -1,14 +1,14 @@
 [tool.poetry]
-name = "controlnet_finetuning"
+name = "blip_caption"
 version = "0.1.0"
-description = "Pull the controlnet model and train it"
+description = "Automated caption generation of a given dataset"
 authors = ["Anaïs Druart <anais.druart@atos.net>"]
 
 [tool.poetry.dependencies]
-python = "^3.8" 
+python = "^3.10" 
 opencv-contrib-python = "~4.9.0"
 opencv-python = "~4.9.0"
-numpy = "~1.26.4"
+numpy = "^1.26.4"
 pillow = "~10.3.0"
 matplotlib = "~3.8.4"
 timm = "~0.9.16"

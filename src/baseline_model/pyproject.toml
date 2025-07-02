@@ -5,7 +5,7 @@ description = "Run the benchmarking process by training the baseline model on sy
 authors = ["Anaïs Druart <anais.druart@atos.net>"]
 
 [tool.poetry.dependencies]
-python = "^3.8" 
+python = "^3.10" 
 opencv-contrib-python = "~4.9.0"
 opencv-python = "~4.9.0"
 numpy = "~1.26.4"
