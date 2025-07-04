@@ -4554,4 +4554,4 @@ torch = "2.7.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "541b56c5b87991e8ecca19772b590cb0e2786e9a3cf76884605a2999cfb81c68"
+content-hash = "3bf56d75b819b55fe8598cece2bc586f5346ade4fbada8a27e8a6ea04eb2aa1b"
