@@ -1,6 +1,0 @@
-{
-    "sonarlint.connectedMode.project": {
-        "connectionId": "https-sonar-sf-eviden-com-",
-        "projectKey": "bds-ailab:syn2real"
-    }
-}
