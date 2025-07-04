@@ -28,9 +28,6 @@ COPY ./diffusers/* /diffusers/
 COPY ./pyproject_model_eval.toml /pyproject_model_eval.toml
 RUN rm /diffusers/README.md
 
-# COPY ./segadapt/* /segadapt/ 
-# RUN rm /segadapt/README.md
-
 # Install python packages
 # hadolint ignore=DL3013,SC1091
 RUN pip --no-cache-dir install --upgrade pip\

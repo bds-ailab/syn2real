@@ -34,6 +34,4 @@ RUN python3 -m venv .venv && \
     pip install --no-cache-dir poetry && \
     poetry install
 
-# COPY --chown="${USER_NAME}":"${GROUP_NAME}" entrypoint.sh /entrypoint.sh
-
 # Write your docker commands here
