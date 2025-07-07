@@ -10,12 +10,12 @@ ARG GROUP_ID
 # hadolint ignore=DL3008
 RUN apt-get update \
     && apt-get install -y --no-install-recommends --fix-missing \
+    curl \
+    git \
     libgl1-mesa-glx \
     libglib2.0-0 \
-    git \
-    curl \
-    unzip \
     sudo \
+    unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -27,9 +27,12 @@ RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" \
 USER "${USER_NAME}":"${GROUP_NAME}"
 
 # Install python packages
-COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./requirements_blip.txt /requirements_blip.txt
-RUN pip install --user --upgrade pip && \
-    pip install --user --default-timeout=100 --no-cache-dir -r /requirements_blip.txt
+COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./pyproject_blip.toml /pyproject_blip.toml
+# hadolint ignore=DL3013,SC1091
+RUN python3 -m venv .venv && \
+    . .venv/bin/activate && \
+    pip install --no-cache-dir poetry && \
+    poetry install
 
 # COPY --chown="${USER_NAME}":"${GROUP_NAME}" entrypoint.sh /entrypoint.sh
 

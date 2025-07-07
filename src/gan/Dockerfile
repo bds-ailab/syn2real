@@ -23,10 +23,11 @@ RUN apt-get update \
 RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" && \
     useradd -m -u "${USER_ID}" -l "${USER_NAME}" -G "${GROUP_NAME}"
 
-COPY ./requirements.txt /requirements.txt 
+COPY ./pyproject_gan.toml /pyproject_gan.toml
 
+# hadolint ignore=DL3013,SC1091
 RUN pip --no-cache-dir install --upgrade pip\
-    && pip install --no-cache-dir --requirement /requirements.txt
+    && pip install --no-cache-dir --requirement /pyproject_gan.toml
 
 # Copy source code
 USER "${USER_NAME}":"${GROUP_NAME}"

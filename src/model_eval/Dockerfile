@@ -25,18 +25,16 @@ RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" && \
 
 # Copy working dir to clone the git repo inside
 COPY ./diffusers/* /diffusers/
-COPY ./requirements_add.txt /requirements_add.txt
+COPY ./pyproject_model_eval.toml /pyproject_model_eval.toml
 RUN rm /diffusers/README.md
 
-# COPY ./segadapt/* /segadapt/ 
-# RUN rm /segadapt/README.md
-
 # Install python packages
+# hadolint ignore=DL3013,SC1091
 RUN pip --no-cache-dir install --upgrade pip\
     && git clone https://github.com/huggingface/diffusers /diffusers/\
     && pip install --no-cache-dir -e /diffusers/.\
     && pip install --no-cache-dir -r /diffusers/examples/controlnet/requirements_sdxl.txt\
-    && pip install --no-cache-dir -r /requirements_add.txt
+    && pip install --no-cache-dir -r /pyproject_model_eval.toml
 
 # Copy source code
 USER "${USER_NAME}":"${GROUP_NAME}"
