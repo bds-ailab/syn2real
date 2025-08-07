@@ -1,6 +1,6 @@
 import sys
 import os
-from dataset import MyDataset, CityDataset
+from controlnet_finetuning.dataset import MyDataset, CityDataset
 import torch
 import argparse
 import yaml

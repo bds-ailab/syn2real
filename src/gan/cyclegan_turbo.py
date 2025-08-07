@@ -10,7 +10,7 @@ from peft.utils import get_peft_model_state_dict
 
 p = "src/"
 sys.path.append(p)
-from model import make_1step_sched, my_vae_encoder_fwd, my_vae_decoder_fwd, download_url
+from gan.model import make_1step_sched, my_vae_encoder_fwd, my_vae_decoder_fwd, download_url
 
 
 class VAE_encode(nn.Module):
@@ -220,32 +220,37 @@ class CycleGAN_Turbo(torch.nn.Module):
         if pretrained_name == "day_to_night":
             url = "https://www.cs.cmu.edu/~img2img-turbo/models/day2night.pkl"
             self.load_ckpt_from_url(url, ckpt_folder)
-            self.timesteps = torch.tensor([999], device="cuda").long()
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.timesteps = torch.tensor([999], device=device).long()
             self.caption = "driving in the night"
             self.direction = "a2b"
         elif pretrained_name == "night_to_day":
             url = "https://www.cs.cmu.edu/~img2img-turbo/models/night2day.pkl"
             self.load_ckpt_from_url(url, ckpt_folder)
-            self.timesteps = torch.tensor([999], device="cuda").long()
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.timesteps = torch.tensor([999], device=device).long()
             self.caption = "driving in the day"
             self.direction = "b2a"
         elif pretrained_name == "clear_to_rainy":
             url = "https://www.cs.cmu.edu/~img2img-turbo/models/clear2rainy.pkl"
             self.load_ckpt_from_url(url, ckpt_folder)
-            self.timesteps = torch.tensor([999], device="cuda").long()
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.timesteps = torch.tensor([999], device=device).long()
             self.caption = "driving in heavy rain"
             self.direction = "a2b"
         elif pretrained_name == "rainy_to_clear":
             url = "https://www.cs.cmu.edu/~img2img-turbo/models/rainy2clear.pkl"
             self.load_ckpt_from_url(url, ckpt_folder)
-            self.timesteps = torch.tensor([999], device="cuda").long()
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.timesteps = torch.tensor([999], device=device).long()
             self.caption = "driving in the day"
             self.direction = "b2a"
 
         elif pretrained_path is not None:
             sd = torch.load(pretrained_path)
             self.load_ckpt_from_state_dict(sd)
-            self.timesteps = torch.tensor([999], device="cuda").long()
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.timesteps = torch.tensor([999], device=device).long()
             self.caption = None
             self.direction = None
 

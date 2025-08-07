@@ -1,7 +1,7 @@
 import sys
 import os
-from dataset import MyDataset, CityDataset
-from train_config import RESUME_PATH, MODEL_PATH, DATA_PATH, VAL_DATA_PATH
+from controlnet_finetuning.dataset import MyDataset, CityDataset
+from controlnet_finetuning.train import RESUME_PATH, MODEL_PATH, DATA_PATH, VAL_DATA_PATH
 
 # Adding the src directory to the sys.path to ensure imports work correctly
 sys.path.insert(

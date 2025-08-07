@@ -8,7 +8,7 @@ from torchvision.io import read_image
 from torchvision.ops.boxes import masks_to_boxes
 from torchvision import tv_tensors
 from torchvision.transforms.v2 import functional as F
-from labels import reduced_labels, labels
+from model_eval.labels import reduced_labels, labels
 from PIL import Image, ImageFile, ImageFilter
 from torchvision.utils import draw_bounding_boxes
 from torchvision.utils import save_image

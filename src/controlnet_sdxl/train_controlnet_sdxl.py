@@ -31,13 +31,13 @@ from diffusers.utils import check_min_version, is_wandb_available
 from diffusers.utils.import_utils import is_torch_npu_available, is_xformers_available
 from diffusers.utils.torch_utils import is_compiled_module
 
-from dataset import get_train_dataset, prepare_train_dataset, collate_fn
-from model import (
+from controlnet_sdxl.dataset import get_train_dataset, prepare_train_dataset, collate_fn
+from controlnet_sdxl.model import (
     import_model_class_from_model_name_or_path,
     save_model_card,
     encode_prompt,
 )
-from log import log_validation, parse_args
+from controlnet_sdxl.log import log_validation, parse_args
 
 
 # Will error if the minimal version of diffusers is not installed. Remove at your own risks.

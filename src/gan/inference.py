@@ -3,14 +3,13 @@ import argparse
 from PIL import Image
 import torch
 from torchvision import transforms
-from cyclegan_turbo import CycleGAN_Turbo
-from training_utils import build_transform
+from gan.cyclegan_turbo import CycleGAN_Turbo
+from gan.training_utils import build_transform
 from PIL import ImageFile
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-
-if __name__ == "__main__":
+def main(arg_list=None):
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--input_image", type=str, required=True, help="path to the input image"
@@ -56,7 +55,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Use Float16 precision for faster inference",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(arg_list)
 
     # only one of model_name and model_path should be provided
     if args.model_name is None != args.model_path is None:
@@ -107,3 +106,6 @@ if __name__ == "__main__":
         # save the output image
         bname = os.path.basename(input_image_path)
         output_pil.save(os.path.join(args.output_dir, bname))
+
+if __name__ == "__main__":
+    main()

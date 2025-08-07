@@ -8,7 +8,7 @@ from torchvision.transforms.functional import to_pil_image
 from matplotlib import colormaps
 import PIL
 from sklearn.metrics import confusion_matrix, classification_report
-from config import DEVICE, CONF_PATH, REPORT_PATH
+from baseline_model.config import DEVICE, CONF_PATH, REPORT_PATH
 
 
 def conf_mtx(
