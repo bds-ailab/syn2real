@@ -9,6 +9,7 @@ from PIL import ImageFile
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+
 def main(arg_list=None):
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -106,6 +107,7 @@ def main(arg_list=None):
         # save the output image
         bname = os.path.basename(input_image_path)
         output_pil.save(os.path.join(args.output_dir, bname))
+
 
 if __name__ == "__main__":
     main()

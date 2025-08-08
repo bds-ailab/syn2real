@@ -10,7 +10,12 @@ from peft.utils import get_peft_model_state_dict
 
 p = "src/"
 sys.path.append(p)
-from gan.model import make_1step_sched, my_vae_encoder_fwd, my_vae_decoder_fwd, download_url
+from gan.model import (
+    make_1step_sched,
+    my_vae_encoder_fwd,
+    my_vae_decoder_fwd,
+    download_url,
+)
 
 
 class VAE_encode(nn.Module):

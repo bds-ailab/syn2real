@@ -48,7 +48,7 @@ def train(
     criterion=CRITEREON,
     lr=LR,
     device=DEVICE,
-    log_file=LOG_FILE
+    log_file=LOG_FILE,
 ):
     """function: train the ResNet model on given dataloader
 

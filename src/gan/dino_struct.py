@@ -237,5 +237,3 @@ class DinoStructureLoss:
             )
             loss += F.mse_loss(keys_ssim, target_keys_self_sim)
         return loss
-
-    
