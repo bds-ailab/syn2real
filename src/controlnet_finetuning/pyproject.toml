@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Pull the controlnet model and train it"
 authors = [
     {name = "Anaïs Druart", email = "anais.druart@atos.net"}
+
 ]
 readme = "README.md"
 requires-python = "^3.10"
@@ -34,6 +35,7 @@ dependencies = [
     "prettytable (>=3.6.0,<3.7.0)",
     "basicsr (>=1.4.2,<1.5.0)",
     "streamlit (>=1.12.1,<1.13.0)"
+
 ]
 
 [tool.poetry]
@@ -49,3 +51,4 @@ pytest-clarity = "~1.0.1"
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
