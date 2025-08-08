@@ -127,7 +127,7 @@ class TestModel:
                 self.conv_in = nn.Conv2d(C, C, 3, padding=1)
                 self.up_blocks = nn.ModuleList(
                     [
-                        Conv2dWithLE(C, C), 
+                        Conv2dWithLE(C, C),
                         FnModule(lambda x, le=None: x),
                         FnModule(lambda x, le=None: x),
                         FnModule(lambda x, le=None: x),

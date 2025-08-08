@@ -279,7 +279,9 @@ class TestDinoStruct:
     @it("it must compute self-similarity from input image keys")
     @mock.patch("gan.dino_struct.attn_cosine_sim")  # Patch the similarity function
     @mock.patch.object(VitExtractor, "get_keys_from_input")  # Patch internal method
-    def test_get_keys_self_sim_from_input(self, mock_get_keys_from_input, mock_attn_cosine_sim):
+    def test_get_keys_self_sim_from_input(
+        self, mock_get_keys_from_input, mock_attn_cosine_sim
+    ):
         # Create dummy input image
         input_img = torch.randn(1, 3, 224, 224)
         layer_num = 11

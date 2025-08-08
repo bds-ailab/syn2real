@@ -345,36 +345,47 @@ class TestCycleGANTurboCoverage:
 
         # 4) Stub capability/property calls if they are invoked
         mocker.patch("torch.cuda.get_device_capability", return_value=(8, 0))
-        mocker.patch("torch.cuda.get_device_properties", return_value=mock.Mock(
-            name='FakeCudaProps',
-            major=8, minor=0, total_memory=24_000_000_000))
+        mocker.patch(
+            "torch.cuda.get_device_properties",
+            return_value=mock.Mock(
+                name="FakeCudaProps", major=8, minor=0, total_memory=24_000_000_000
+            ),
+        )
 
         # 5) Very important: prevent creating tensors with device='cuda'
         #    Remove the 'device' argument if it is passed.
         _orig_tensor = torch.tensor
+
         def _cpu_tensor(*args, **kwargs):
             kwargs.pop("device", None)
             return _orig_tensor(*args, **kwargs)
+
         mocker.patch("torch.tensor", side_effect=_cpu_tensor)
 
         # Patch heavy dependencies used in the model
         fake_unet, fake_vae, sched = _patch_heavy_deps(mocker)
 
         # Fake state dict to avoid heavy loading
-        sd = make_state_dict_for_copy({
-            fake_unet.named_parameters.return_value[0][0]:
-                fake_unet.named_parameters.return_value[0][1].data,
-            fake_unet.named_parameters.return_value[1][0]:
-                fake_unet.named_parameters.return_value[1][1].data,
-            fake_unet.named_parameters.return_value[2][0]:
-                fake_unet.named_parameters.return_value[2][1].data,
-        })
+        sd = make_state_dict_for_copy(
+            {
+                fake_unet.named_parameters.return_value[0][
+                    0
+                ]: fake_unet.named_parameters.return_value[0][1].data,
+                fake_unet.named_parameters.return_value[1][
+                    0
+                ]: fake_unet.named_parameters.return_value[1][1].data,
+                fake_unet.named_parameters.return_value[2][
+                    0
+                ]: fake_unet.named_parameters.return_value[2][1].data,
+            }
+        )
         mocker.patch("torch.load", return_value=sd)
 
         # Avoid any network download
         mocker.patch("gan.cyclegan_turbo.download_url", return_value=None)
 
         from gan.cyclegan_turbo import CycleGAN_Turbo
+
         m = CycleGAN_Turbo(pretrained_name="day_to_night")
 
         # Sanity check to ensure adapters were added

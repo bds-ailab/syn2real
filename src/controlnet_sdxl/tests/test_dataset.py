@@ -27,6 +27,7 @@ def mock_args():
 
     return MockArgs()
 
+
 @pytest.fixture
 def mock_accelerator():
     class MockAccelerator:
@@ -42,6 +43,7 @@ def mock_accelerator():
 
     return MockAccelerator()
 
+
 @pytest.fixture
 def mock_logger():
     class MockLogger:
@@ -50,32 +52,42 @@ def mock_logger():
 
     return MockLogger()
 
+
 @pytest.fixture
 def mock_dataset():
     data = {
         "train": {
             "image": [Image.fromarray(np.zeros((256, 256, 3), dtype=np.uint8))],
             "caption": ["A sample caption"],
-            "conditioning_image": [Image.fromarray(np.zeros((256, 256, 3), dtype=np.uint8))],
+            "conditioning_image": [
+                Image.fromarray(np.zeros((256, 256, 3), dtype=np.uint8))
+            ],
             "syn_or_real": [True],
         }
     }
     return DatasetDict({k: Dataset.from_dict(v) for k, v in data.items()})
 
+
 @describe("Test the functions of the dataset handling")
 class TestDatasetFunctions:
-    
+
     @it("should correctly load the training dataset")
     @mock.patch("controlnet_sdxl.dataset.load_dataset")
-    def test_get_train_dataset(self, mock_load_dataset, mock_args, mock_accelerator, mock_logger, mock_dataset):
+    def test_get_train_dataset(
+        self, mock_load_dataset, mock_args, mock_accelerator, mock_logger, mock_dataset
+    ):
         mock_load_dataset.return_value = mock_dataset
-        
+
         dataset = get_train_dataset(mock_args, mock_accelerator, mock_logger)
-        assert len(dataset) == len(mock_dataset["train"])  # Ensure the dataset is loaded correctly
+        assert len(dataset) == len(
+            mock_dataset["train"]
+        )  # Ensure the dataset is loaded correctly
 
     @it("should prepare the training dataset correctly")
     def test_prepare_train_dataset(self, mock_args, mock_dataset, mock_accelerator):
-        dataset = prepare_train_dataset(mock_args, mock_dataset["train"], mock_accelerator)
+        dataset = prepare_train_dataset(
+            mock_args, mock_dataset["train"], mock_accelerator
+        )
         assert "pixel_values" in dataset[0]
         assert "conditioning_pixel_values" in dataset[0]
 
@@ -83,7 +95,9 @@ class TestDatasetFunctions:
     def test_collate_fn(self):
         mock_data = {
             "pixel_values": torch.tensor(np.zeros((3, 256, 256), dtype=np.float32)),
-            "conditioning_pixel_values": torch.tensor(np.zeros((3, 256, 256), dtype=np.float32)),
+            "conditioning_pixel_values": torch.tensor(
+                np.zeros((3, 256, 256), dtype=np.float32)
+            ),
             "prompt_embeds": torch.tensor([1.0]),
             "text_embeds": torch.tensor([1.0]),
             "time_ids": torch.tensor([1.0]),

@@ -12,6 +12,7 @@ from controlnet_sdxl.active_train import (
 it = pytest.mark.it
 describe = pytest.mark.describe
 
+
 @describe("read_train_config function")
 class TestReadTrainConfig:
 
@@ -128,7 +129,7 @@ class TestActiveTrainLoop:
                 "max_steps": 1000,
                 "max_steps2": 1000,
                 "acc_steps": 1,
-                "acc_steps2":1,
+                "acc_steps2": 1,
             },
             "round1": {
                 "in_json": "input1.json",
@@ -148,7 +149,7 @@ class TestActiveTrainLoop:
                 "max_steps": 1000,
                 "max_steps2": 1000,
                 "acc_steps": 1,
-                "acc_steps2":1,
+                "acc_steps2": 1,
             },
         }
 

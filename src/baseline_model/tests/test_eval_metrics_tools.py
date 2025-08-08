@@ -4,17 +4,22 @@ import torch
 from unittest import mock
 from sklearn.metrics import confusion_matrix, classification_report
 from baseline_model.eval_metrics_tools import conf_mtx, GradCamInspector
-from baseline_model.config import  REPORT_PATH
+from baseline_model.config import REPORT_PATH
+
 
 @pytest.mark.describe("Testing the conf_mtx function")
 class TestConfMtx:
-    @pytest.mark.it("Must compute and return confusion matrix and classification report")
+    @pytest.mark.it(
+        "Must compute and return confusion matrix and classification report"
+    )
     @mock.patch("matplotlib.pyplot.show")
     @mock.patch("builtins.open", new_callable=mock.mock_open)
     @mock.patch("PIL.Image.open", return_value=mock.Mock())
     @mock.patch("matplotlib.pyplot.figure")
     @mock.patch("seaborn.heatmap")
-    def test_conf_mtx(self, mock_open, mock_show, mock_image_open, mock_pyplot, mock_heatmap):
+    def test_conf_mtx(
+        self, mock_open, mock_show, mock_image_open, mock_pyplot, mock_heatmap
+    ):
         labels = np.array([0, 1, 2, 2, 1, 0])
         preds = np.array([0, 1, 1, 2, 1, 0])
         class_names = ["class_0", "class_1", "class_2"]

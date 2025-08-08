@@ -10,10 +10,12 @@ from baseline_model.model_tools import load_resnet50, save_log, train, evaluate_
 it = pytest.mark.it
 describe = pytest.mark.describe
 
+
 class SimpleModel(nn.Module):
     """
     Simple class to mimick a basic model allowing us to test the model_tools functions
     """
+
     def __init__(self, num_classes):
         super(SimpleModel, self).__init__()
         self.flatten = nn.Flatten()
@@ -27,13 +29,12 @@ class SimpleModel(nn.Module):
         return x
 
 
-
 @describe("Testing the tool functions around the ResNet50 training")
 class TestModelTools:
     # Mock data
-    mock_data= [(torch.zeros(3, 224, 224), 0)]
+    mock_data = [(torch.zeros(3, 224, 224), 0)]
     mock_train_dataloader = DataLoader(mock_data)
-    mock_val_dataloader= DataLoader(mock_data)
+    mock_val_dataloader = DataLoader(mock_data)
     mock_report = {}
 
     @it("Must load ResNet50 and replace the final layer correctly")
@@ -77,8 +78,7 @@ class TestModelTools:
             criterion=nn.CrossEntropyLoss(),
             lr=0.001,
             device="cpu",
-            log_file="mock_log.txt"
-
+            log_file="mock_log.txt",
         )
 
         # Assertions
@@ -90,10 +90,11 @@ class TestModelTools:
     def test_evaluate_model(self, mock_no_grad):
         model = SimpleModel(num_classes=10)
         with torch.no_grad():
-            preds, labels = evaluate_model(model, self.mock_val_dataloader, device="cpu")
+            preds, labels = evaluate_model(
+                model, self.mock_val_dataloader, device="cpu"
+            )
 
         # Assertions
         assert isinstance(preds, np.ndarray)
         assert isinstance(labels, np.ndarray)
         assert len(preds) == len(labels)
-

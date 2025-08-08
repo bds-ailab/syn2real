@@ -17,6 +17,7 @@ it = pytest.mark.it
 describe = pytest.mark.describe
 skip = pytest.mark.skip
 
+
 @describe("Test model import and saving functions")
 class TestModelFunctions:
 
@@ -63,7 +64,7 @@ class TestModelFunctions:
         base_model = "base_model"
         repo_folder = "repo_folder"
         image_mock = mock.Mock()
-        image_mock.size = (10,10)
+        image_mock.size = (10, 10)
         image_logs = [
             {
                 "images": [image_mock, mock.Mock()],
@@ -80,4 +81,3 @@ class TestModelFunctions:
 
         # Check if the README.md was saved correctly
         assert os.path.exists(os.path.join(repo_folder, "README.md"))
-        

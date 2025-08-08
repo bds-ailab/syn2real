@@ -64,7 +64,9 @@ class TestMMD:
         assert torch.isfinite(out)
 
     @pytest.mark.it("raises or fails clearly when shapes are incompatible")
-    @pytest.mark.it("accepts different numbers of samples (n_x != n_y) and stays finite")
+    @pytest.mark.it(
+        "accepts different numbers of samples (n_x != n_y) and stays finite"
+    )
     def test_different_sample_count_ok(self):
         rng = np.random.default_rng(5)
         x = rng.standard_normal((8, 4)).astype(np.float32)

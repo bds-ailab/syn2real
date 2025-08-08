@@ -1,11 +1,16 @@
 import pytest
 from unittest import mock
-from controlnet_sdxl.train_sdxl_unlocked import main  # Replace with the actual module name
+from controlnet_sdxl.train_sdxl_unlocked import (
+    main,
+)  # Replace with the actual module name
+
 
 @pytest.mark.describe("Main Function Tests")
 class TestMainFunction:
 
-    @pytest.mark.it("should raise ValueError when both report_to and hub_token are provided")
+    @pytest.mark.it(
+        "should raise ValueError when both report_to and hub_token are provided"
+    )
     def test_report_to_and_hub_token(self):
         args = mock.Mock()
         args.report_to = "wandb"
@@ -67,6 +72,7 @@ class TestMainFunction:
             mock_set_seed.assert_called_once_with(42)
 
     # Add more tests for other functionalities as needed
+
 
 if __name__ == "__main__":
     pytest.main()

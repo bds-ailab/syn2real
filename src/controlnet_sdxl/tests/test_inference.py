@@ -9,6 +9,7 @@ from controlnet_sdxl.inference import main, sharpen, correct
 it = pytest.mark.it
 describe = pytest.mark.describe
 
+
 @describe("Test image generation and processing functions")
 class TestInference:
 
@@ -32,7 +33,9 @@ class TestInference:
         seed = 42
 
         # Mocking load_image to return a dummy image
-        mock_load_image.side_effect = lambda path: Image.fromarray(np.zeros((512, 1024, 3), dtype=np.uint8))
+        mock_load_image.side_effect = lambda path: Image.fromarray(
+            np.zeros((512, 1024, 3), dtype=np.uint8)
+        )
 
         images = main(mock_pipeline, cond_image_paths, prompts, seed)
 
@@ -56,7 +59,9 @@ class TestInference:
         sharpened_image = cv2.imread(sharpened_image_path)
 
         assert sharpened_image is not None  # Ensure the image was saved
-        assert sharpened_image.shape == dummy_image.shape  # Ensure the shape is the same
+        assert (
+            sharpened_image.shape == dummy_image.shape
+        )  # Ensure the shape is the same
 
     @it("should correct brightness and contrast of the image")
     def test_correct(self):
@@ -67,4 +72,6 @@ class TestInference:
         corrected_image = correct(dummy_image, brightness=300, contrast=150)
 
         assert corrected_image is not None  # Ensure the image is returned
-        assert corrected_image.shape == dummy_image.shape  # Ensure the shape is the same
+        assert (
+            corrected_image.shape == dummy_image.shape
+        )  # Ensure the shape is the same

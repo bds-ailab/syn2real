@@ -11,19 +11,30 @@ from controlnet_sdxl.prepare_new_dataset import (
     process_dataset,
 )
 
+
 @pytest.mark.describe("TestPrepareNewDataset")
 class TestPrepareNewDataset:
 
     @pytest.mark.it("should read json data correctly from a json file")
-    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=json.dumps([{"image": "path/to/image.png"}]))
+    @mock.patch(
+        "builtins.open",
+        new_callable=mock.mock_open,
+        read_data=json.dumps([{"image": "path/to/image.png"}]),
+    )
     def test_read_json_data_json(self, mock_open):
         result = read_json_data("test.json")
         assert result == [{"image": "path/to/image.png"}]
 
     @pytest.mark.it("should read jsonl data correctly from a jsonl file")
-    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=json.dumps({"image": "path/to/image.png"}) + "\n")
+    @mock.patch(
+        "builtins.open",
+        new_callable=mock.mock_open,
+        read_data=json.dumps({"image": "path/to/image.png"}) + "\n",
+    )
     def test_read_json_data_jsonl(self, mock_open):
-        mock_open.return_value.readlines.return_value = [json.dumps({"image": "path/to/image.png"}) + "\n"]
+        mock_open.return_value.readlines.return_value = [
+            json.dumps({"image": "path/to/image.png"}) + "\n"
+        ]
         result = read_json_data("test.jsonl")
         assert result == [{"image": "path/to/image.png"}]
 
@@ -82,7 +93,7 @@ class TestPrepareNewDataset:
         batch = {
             "im": ["mock_image"],
             "text": ["mock prompt"],
-            "cond": ["mock_conditioning_image"]
+            "cond": ["mock_conditioning_image"],
         }
         mock_transform_img.return_value = ["transformed_image"]
 
@@ -97,7 +108,7 @@ class TestPrepareNewDataset:
         batch = {
             "im": [mock.Mock(), mock.Mock()],
             "cond": [mock.Mock(), mock.Mock()],
-            "text": ["prompt 1", "prompt 2"]
+            "text": ["prompt 1", "prompt 2"],
         }
         out_data = []
         starting_idx = 0
@@ -112,13 +123,25 @@ class TestPrepareNewDataset:
     @mock.patch("controlnet_sdxl.prepare_new_dataset.write_json_data")
     @mock.patch("controlnet_sdxl.prepare_new_dataset.load_pipeline")
     @mock.patch("PIL.Image.open")
-    def test_process_dataset(self, mock_image_open, mock_load_pipeline, mock_write_json_data, mock_read_json_data):
+    def test_process_dataset(
+        self,
+        mock_image_open,
+        mock_load_pipeline,
+        mock_write_json_data,
+        mock_read_json_data,
+    ):
         args = mock.Mock()
         args.in_json_file = "input.json"
         args.out_json_file = "output.json"
         args.out_dataset_folder = "output_folder"
 
-        mock_read_json_data.return_value = [{"image": "img_path", "conditioning_image": "cond_img_path", "text": "a synthetic image"}]
+        mock_read_json_data.return_value = [
+            {
+                "image": "img_path",
+                "conditioning_image": "cond_img_path",
+                "text": "a synthetic image",
+            }
+        ]
         mock_image = mock.Mock()
         mock_image.size = (1024, 512)
         mock_image_open.side_effect = [mock_image, mock.Mock(size=(1024, 512))]
@@ -127,4 +150,6 @@ class TestPrepareNewDataset:
 
         process_dataset(args)
         mock_read_json_data.assert_called()
-        mock_write_json_data.assert_called_once_with(args.out_json_file, mock_read_json_data.return_value)
+        mock_write_json_data.assert_called_once_with(
+            args.out_json_file, mock_read_json_data.return_value
+        )
