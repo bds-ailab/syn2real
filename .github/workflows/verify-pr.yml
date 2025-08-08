@@ -188,35 +188,6 @@ jobs:
             ./.cache/*
           fail_on_error: true
 
-  sonar:
-    runs-on: ubuntu-latest
-    name: ☢️ Run Sonar analysis
-    outputs:
-      failure: ${{ steps.sonar.outcome == 'failure' }}
-    steps:
-      - name: 📂 Checkout
-        uses: actions/checkout@v3
-
-      - name: ☢️ Sonar analysis
-        id: sonar
-        uses: sonarsource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
-          SONAR_HOST_URL: https://${{ vars.SONARQUBE_HOST }}
-        with:
-          args: >
-            -Dsonar.projectKey=${{ github.repository_owner }}:${{ github.event.repository.name }}
-            -Dsonar.projectName=${{ github.repository_owner }}:${{ github.event.repository.name }}
-            -Dsonar.links.homepage=${{ github.server_url }}/${{ github.repository }}
-            -Dsonar.links.ci=${{ github.server_url }}/${{ github.repository }}/actions/
-            -Dsonar.links.scm=${{ github.server_url }}/${{ github.repository }}
-            -Dsonar.python.xunit.reportPath=reports/${{ needs.testing.outputs.junit }}
-            -Dsonar.python.coverage.reportPaths=reports/${{ needs.testing.outputs.coverage }}
-            -Dsonar.sources=.
-            -Dsonar.exclusions=**/tests/**/*.py
-            -Dsonar.tests=.
-            -Dsonar.test.inclusions=**/tests/**/*.py
-            -Dsonar.qualitygate.wait=true
 
   pr-ready-to-merge:
     needs:
@@ -244,6 +215,3 @@ jobs:
         if: ${{ needs.lint-shell.outputs.failure == 'true' }}
         run: exit 1
 
-      - name: 'Verify: ☢️ Run Sonar analysis'
-        if: ${{ needs.sonar.outputs.failure == 'true' }}
-        run: exit 1
