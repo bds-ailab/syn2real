@@ -10,14 +10,19 @@ from controlnet_sdxl.segment import (
     construct_seg_model,
     generate_mask,
     merge_masks,
-    main
+    main,
 )
+
 
 @pytest.mark.describe("TestSegmentationFunctions")
 class TestSegmentationFunctions:
 
     @pytest.mark.it("should read json data correctly from a json file")
-    @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=json.dumps([{"conditioning_image": "path/to/image.png"}]))
+    @mock.patch(
+        "builtins.open",
+        new_callable=mock.mock_open,
+        read_data=json.dumps([{"conditioning_image": "path/to/image.png"}]),
+    )
     def test_read_json_data(self, mock_open):
         result = read_json_data("test.json")
         assert result == [{"conditioning_image": "path/to/image.png"}]
@@ -45,7 +50,9 @@ class TestSegmentationFunctions:
         mock_imread.return_value = mock_image
         mock_cvtColor.return_value = mock_image
         mock_mask_generator = mock.Mock()
-        mock_mask_generator.generate.return_value = [{"segmentation": np.random.randint(0, 2, (100, 100), dtype=bool)}]
+        mock_mask_generator.generate.return_value = [
+            {"segmentation": np.random.randint(0, 2, (100, 100), dtype=bool)}
+        ]
 
         masks = generate_mask("path/to/image.png", mock_mask_generator)
         assert len(masks) == 1
@@ -53,19 +60,42 @@ class TestSegmentationFunctions:
 
     @pytest.mark.it("should merge the predicted masks correctly")
     def test_merge_masks(self):
-        masks = [{"segmentation": np.random.randint(0, 2, (100, 100), dtype=bool)} for _ in range(5)]
+        masks = [
+            {"segmentation": np.random.randint(0, 2, (100, 100), dtype=bool)}
+            for _ in range(5)
+        ]
         merged_mask = merge_masks(masks)
         assert merged_mask.shape == (100, 100, 3)
 
     @pytest.mark.it("should run the main function without errors")
     @mock.patch("os.path.isdir", return_value=False)
     @mock.patch("os.mkdir")
-    @mock.patch("controlnet_sdxl.segment.read_json_data", return_value=[{"conditioning_image": "path/to/image.png"}])
+    @mock.patch(
+        "controlnet_sdxl.segment.read_json_data",
+        return_value=[{"conditioning_image": "path/to/image.png"}],
+    )
     @mock.patch("controlnet_sdxl.segment.construct_seg_model", return_value=mock.Mock())
-    @mock.patch("controlnet_sdxl.segment.generate_mask", return_value=[{"segmentation": np.random.randint(0, 2, (100, 100), dtype=bool)}])
-    @mock.patch("controlnet_sdxl.segment.merge_masks", return_value=np.zeros((100, 100, 3), dtype=np.uint8))
+    @mock.patch(
+        "controlnet_sdxl.segment.generate_mask",
+        return_value=[
+            {"segmentation": np.random.randint(0, 2, (100, 100), dtype=bool)}
+        ],
+    )
+    @mock.patch(
+        "controlnet_sdxl.segment.merge_masks",
+        return_value=np.zeros((100, 100, 3), dtype=np.uint8),
+    )
     @mock.patch("cv2.imwrite")
-    def test_main(self, mock_write, mock_merge, mock_generate, mock_construct, mock_read, mock_mkdir, mock_isdir):
+    def test_main(
+        self,
+        mock_write,
+        mock_merge,
+        mock_generate,
+        mock_construct,
+        mock_read,
+        mock_mkdir,
+        mock_isdir,
+    ):
         mock_args = mock.Mock()
         mock_args.in_dataset = "input.json"
         mock_args.out_dataset = "output_folder"
@@ -78,4 +108,3 @@ class TestSegmentationFunctions:
         mock_mkdir.assert_called_once()
         # Check if the correct number of images were processed
         assert mock_write.call_count == 1
-
