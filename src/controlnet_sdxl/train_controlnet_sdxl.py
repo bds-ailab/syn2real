@@ -19,6 +19,7 @@ from packaging import version
 from tqdm.auto import tqdm
 from transformers import AutoTokenizer
 
+from datasets.fingerprint import Hasher
 import diffusers
 from diffusers import (
     AutoencoderKL,
@@ -38,7 +39,7 @@ from controlnet_sdxl.model import (
     encode_prompt,
 )
 from controlnet_sdxl.log import log_validation, parse_args
-
+from bitsandbytes.optim import AdamW8bit
 
 # Will error if the minimal version of diffusers is not installed. Remove at your own risks.
 check_min_version("0.30.0.dev0")
@@ -47,6 +48,10 @@ logger = get_logger(__name__)
 if is_torch_npu_available():
     torch.npu.config.allow_internal_format = False
 
+def unwrap_model(accelerator, model):
+    model = accelerator.unwrap_model(model)
+    model = model._orig_mod if is_compiled_module(model) else model
+    return model
 
 def main(args):
     if args.report_to == "wandb" and args.hub_token is not None:
@@ -184,10 +189,6 @@ def main(args):
         logger.info("Initializing controlnet weights from unet")
         controlnet = ControlNetModel.from_unet(unet)
 
-    def unwrap_model(model):
-        model = accelerator.unwrap_model(model)
-        model = model._orig_mod if is_compiled_module(model) else model
-        return model
 
     # `accelerate` 0.16.0 will have better support for customized saving
     if version.parse(accelerate.__version__) >= version.parse("0.16.0"):
@@ -264,9 +265,9 @@ def main(args):
         " doing mixed precision training, copy of the weights should still be float32."
     )
 
-    if unwrap_model(controlnet).dtype != torch.float32:
+    if unwrap_model(accelerator, controlnet).dtype != torch.float32:
         raise ValueError(
-            f"Controlnet loaded as datatype {unwrap_model(controlnet).dtype}. {low_precision_error_string}"
+            f"Controlnet loaded as datatype {unwrap_model(accelerator, controlnet).dtype}. {low_precision_error_string}"
         )
 
     # Enable TF32 for faster training on Ampere GPUs,
@@ -291,7 +292,7 @@ def main(args):
                 "To use 8-bit Adam, please install the bitsandbytes library: `pip install bitsandbytes`."
             )
 
-        optimizer_class = bnb.optim.AdamW8bit
+        optimizer_class = AdamW8bit
     else:
         optimizer_class = torch.optim.AdamW
 
@@ -366,7 +367,6 @@ def main(args):
         proportion_empty_prompts=args.proportion_empty_prompts,
     )
     with accelerator.main_process_first():
-        from datasets.fingerprint import Hasher
 
         # fingerprint used by the cache for the other processes to load the result
         # details: https://github.com/huggingface/diffusers/pull/4038#discussion_r1266078401
@@ -687,7 +687,7 @@ def main(args):
     # Create the pipeline using using the trained modules and save it.
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
-        controlnet = unwrap_model(controlnet)
+        controlnet = unwrap_model(accelerator, controlnet)
         controlnet.save_pretrained(args.output_dir)
 
         # Run a final round of validation.

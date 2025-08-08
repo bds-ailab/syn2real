@@ -3,6 +3,7 @@ import pytest
 from unittest import mock
 import yaml
 from auto_log_exp_mlflow import search_unlogged_exp_to_be_logged, log_exp
+import mlflow as ml 
 
 it = pytest.mark.it
 describe = pytest.mark.describe
