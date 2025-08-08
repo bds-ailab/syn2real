@@ -126,7 +126,7 @@ class TestMainFunction:
         mock_mid_sample.to.return_value = mock_mid_sample
         mock_controlnet_accelerate.return_value = (mock_down_samples, mock_mid_sample)
         mock_lr = mock.Mock()
-        mock_last_lr = [1,2]
+        mock_last_lr = [1, 2]
         mock_lr.get_last_lr.return_value = mock_last_lr
         mock_accelerator_prepare.return_value = (
             mock_controlnet_accelerate,

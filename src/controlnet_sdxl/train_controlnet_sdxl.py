@@ -48,10 +48,12 @@ logger = get_logger(__name__)
 if is_torch_npu_available():
     torch.npu.config.allow_internal_format = False
 
+
 def unwrap_model(accelerator, model):
     model = accelerator.unwrap_model(model)
     model = model._orig_mod if is_compiled_module(model) else model
     return model
+
 
 def main(args):
     if args.report_to == "wandb" and args.hub_token is not None:
@@ -188,7 +190,6 @@ def main(args):
     else:
         logger.info("Initializing controlnet weights from unet")
         controlnet = ControlNetModel.from_unet(unet)
-
 
     # `accelerate` 0.16.0 will have better support for customized saving
     if version.parse(accelerate.__version__) >= version.parse("0.16.0"):
