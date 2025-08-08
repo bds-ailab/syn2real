@@ -2,8 +2,14 @@ import pytest
 from unittest import mock
 from PIL import Image
 import numpy as np
-from model_eval.train_segmenter import preprocess_train, reduce_labels, augment, read_train_config
+from model_eval.train_segmenter import (
+    preprocess_train,
+    reduce_labels,
+    augment,
+    read_train_config,
+)
 from model_eval.labels import reduced_labels
+
 
 @pytest.mark.describe("Train Segmenter Tests")
 class TestTrainSegmenter:
@@ -16,7 +22,9 @@ class TestTrainSegmenter:
 
         with mock.patch(
             "model_eval.train_segmenter.open", mock.mock_open(read_data="key: value")
-        ), mock.patch("model_eval.train_segmenter.yaml.safe_load", return_value={"key": "value"}):
+        ), mock.patch(
+            "model_eval.train_segmenter.yaml.safe_load", return_value={"key": "value"}
+        ):
             config = read_train_config()
             assert isinstance(config, dict)
             assert config["key"] == "value"
@@ -53,7 +61,9 @@ class TestTrainSegmenter:
 
     @pytest.mark.it("should return augmented images and labels as PIL images")
     def test_augment_function_output_type(self):
-        img = Image.fromarray(np.uint8(np.random.rand(512, 512, 3) * 255)).convert("RGB")
+        img = Image.fromarray(np.uint8(np.random.rand(512, 512, 3) * 255)).convert(
+            "RGB"
+        )
         label = Image.fromarray(np.uint8(np.random.randint(0, 34, (512, 512))))
 
         aug_img, aug_label = augment(img, label)

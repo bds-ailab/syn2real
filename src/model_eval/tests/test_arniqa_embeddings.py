@@ -12,9 +12,11 @@ from unittest import mock
 it = pytest.mark.it
 describe = pytest.mark.describe
 
+
 # Build an in-memory RGB image via PIL without touching disk
 def _fake_pil_image(size=(64, 48), color=(128, 64, 32)):
     from PIL import Image
+
     img = Image.new("RGB", size, color)
     return img
 
@@ -26,12 +28,18 @@ def _fake_pil_image(size=(64, 48), color=(128, 64, 32)):
 class TestArniqaPipeline:
 
     @it("extract_embeddings: runs end-to-end with mocked model / CUDA / I/O")
-    @mock.patch("torch.cuda.empty_cache")                 # do nothing
+    @mock.patch("torch.cuda.empty_cache")  # do nothing
     @mock.patch("torch.cuda.is_available", return_value=False)  # force CPU
-    @mock.patch("torch.hub.load")                         # no network
-    @mock.patch("numpy.save")                             # don't write files
+    @mock.patch("torch.hub.load")  # no network
+    @mock.patch("numpy.save")  # don't write files
     def test_extract_embeddings_cpu_happy_path(
-        self, mock_npsave, mock_hub_load, mock_cuda_avail, mock_empty_cache, tmp_path, monkeypatch
+        self,
+        mock_npsave,
+        mock_hub_load,
+        mock_cuda_avail,
+        mock_empty_cache,
+        tmp_path,
+        monkeypatch,
     ):
         # -- Arrange: import module under test
         import builtins
@@ -46,7 +54,7 @@ class TestArniqaPipeline:
         # We can't rely on __main__, so let's exec the provided snippet in a ModuleType
         if mod is None:
             mod = types.ModuleType("arniqa_pipeline")
-            code = r'''
+            code = r"""
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
@@ -122,7 +130,7 @@ def pca_variance(embeddings, out_path):
     plt.legend(loc="best")
     plt.tight_layout()
     plt.savefig(out_path + "pca_exp_var.png")
-'''
+"""
             exec(code, mod.__dict__)
 
         # -- Arrange: mock PIL.Image.open to return an in-memory image
@@ -145,12 +153,12 @@ def pca_variance(embeddings, out_path):
                             if isinstance(op, T.Normalize):
                                 t = op(t)
                         return t
+
                 return _C()
 
             with mock.patch.object(mod.transforms, "Compose", side_effect=_compose):
                 # Mock Resize op: use T.Resize directly to keep behavior correct
                 with mock.patch.object(mod.transforms, "Resize", new=T.Resize):
-
 
                     # -- Arrange: mock model returned by torch.hub.load
                     fake_model = mock.MagicMock()
@@ -161,11 +169,17 @@ def pca_variance(embeddings, out_path):
                     class _FakeTensor:
                         def __init__(self, arr):
                             self._arr = torch.as_tensor(arr, dtype=torch.float32)
-                        def detach(self): return self
-                        def cpu(self): return self._arr
+
+                        def detach(self):
+                            return self
+
+                        def cpu(self):
+                            return self._arr
 
                     # For N images, return embeddings of dim 5
-                    def _model_call(img, img_ds, return_embedding=True, scale_score=True):
+                    def _model_call(
+                        img, img_ds, return_embedding=True, scale_score=True
+                    ):
                         score = _FakeTensor([0.5])
                         emb = _FakeTensor(np.arange(5))
                         return score, emb
@@ -180,8 +194,8 @@ def pca_variance(embeddings, out_path):
 
         # -- Assert
         assert isinstance(embs, np.ndarray)
-        assert embs.shape == (3, 5)            # 3 images, 5-dim embedding (our fake)
-        mock_npsave.assert_called_once()        # embeddings saved
+        assert embs.shape == (3, 5)  # 3 images, 5-dim embedding (our fake)
+        mock_npsave.assert_called_once()  # embeddings saved
         args, kwargs = mock_npsave.call_args
         assert args[0].endswith("embeddings.npy")
         np.testing.assert_allclose(embs[0], np.arange(5), rtol=0, atol=1e-6)
@@ -204,12 +218,15 @@ def pca_variance(embeddings, out_path):
 
         # Import module & call function
         from importlib import import_module
+
         mod = import_module("__main__") if "__file__" not in globals() else None
         if mod is None:
             pytest.skip("Load the module as in the test above if necessary")
 
         # -- Act
-        mod.project_embeddings(embeddings, labels, method="pca", out_path=str(tmp_path) + os.sep)
+        mod.project_embeddings(
+            embeddings, labels, method="pca", out_path=str(tmp_path) + os.sep
+        )
 
         # -- Assert: plotting called and file saved
         assert mock_scatter.call_count == 3
@@ -224,7 +241,14 @@ def pca_variance(embeddings, out_path):
     @mock.patch("matplotlib.pyplot.title")
     @mock.patch("umap.UMAP")
     def test_project_embeddings_umap(
-        self, mock_umap_cls, mock_title, mock_legend, mock_scatter, mock_figure, mock_savefig, tmp_path
+        self,
+        mock_umap_cls,
+        mock_title,
+        mock_legend,
+        mock_scatter,
+        mock_figure,
+        mock_savefig,
+        tmp_path,
     ):
         # -- Arrange
         embeddings = np.random.randn(6, 4).astype(np.float32)
@@ -237,12 +261,15 @@ def pca_variance(embeddings, out_path):
         mock_umap_cls.return_value = umap_inst
 
         from importlib import import_module
+
         mod = import_module("__main__") if "__file__" not in globals() else None
         if mod is None:
             pytest.skip("Load the module as in the test above if necessary")
 
         # -- Act
-        mod.project_embeddings(embeddings, labels, method="umap", out_path=str(tmp_path) + os.sep)
+        mod.project_embeddings(
+            embeddings, labels, method="umap", out_path=str(tmp_path) + os.sep
+        )
 
         # -- Assert
         umap_inst.fit.assert_called_once()
@@ -260,12 +287,22 @@ def pca_variance(embeddings, out_path):
     @mock.patch("matplotlib.pyplot.ylabel")
     @mock.patch("matplotlib.pyplot.xlabel")
     def test_pca_variance_saves_plot(
-        self, mock_xlabel, mock_ylabel, mock_tight, mock_legend, mock_bar, mock_step, mock_figure, mock_savefig, tmp_path
+        self,
+        mock_xlabel,
+        mock_ylabel,
+        mock_tight,
+        mock_legend,
+        mock_bar,
+        mock_step,
+        mock_figure,
+        mock_savefig,
+        tmp_path,
     ):
         # -- Arrange: embeddings with rank >= 10 so that n_components=50 is clipped by PCA
         embeddings = np.random.randn(64, 16).astype(np.float32)
 
         from importlib import import_module
+
         mod = import_module("__main__") if "__file__" not in globals() else None
         if mod is None:
             pytest.skip("Load the module as in the first test if necessary")

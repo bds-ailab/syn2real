@@ -9,7 +9,9 @@ from unittest import mock
 import model_eval.train_deeplab as mod
 
 
-@pytest.mark.describe("TestTrainDeepLab (tests-only fixes, no changes to production code)")
+@pytest.mark.describe(
+    "TestTrainDeepLab (tests-only fixes, no changes to production code)"
+)
 class TestTrainDeepLab:
     # ------------------------
     # Helpers
@@ -73,7 +75,9 @@ class TestTrainDeepLab:
     @pytest.mark.it("eval_model handles one batch: fake model logits resize to masks")
     def test_eval_model_one_batch(self, mocker):
         class FakeModel(torch.nn.Module):
-            def eval(self): return self
+            def eval(self):
+                return self
+
             def forward(self, x):
                 B, _, H, W = x.shape
                 return {"out": torch.randn(B, len(mod.labels), H, W)}
@@ -107,7 +111,9 @@ class TestTrainDeepLab:
         assert isinstance(loss, float)
         assert "iou_mean" in results
 
-    @pytest.mark.it("get_dataloader does not crash with small dataset (patch select_range)")
+    @pytest.mark.it(
+        "get_dataloader does not crash with small dataset (patch select_range)"
+    )
     def test_get_dataloader(self, tmp_path, mocker):
         train_root = tmp_path / "train"
         test_root = tmp_path / "test"
@@ -115,8 +121,14 @@ class TestTrainDeepLab:
         self._write_cityscapes_like(test_root, n=2)
 
         original_cls = mod.CityscapesDataset
-        def _patched_cityscapes(root, labels, transforms, shuffle=True, select_range=None, seed=0):
-            return original_cls(root, labels, transforms, shuffle=shuffle, select_range=None, seed=seed)
+
+        def _patched_cityscapes(
+            root, labels, transforms, shuffle=True, select_range=None, seed=0
+        ):
+            return original_cls(
+                root, labels, transforms, shuffle=shuffle, select_range=None, seed=seed
+            )
+
         mocker.patch.object(mod, "CityscapesDataset", side_effect=_patched_cityscapes)
 
         dls = mod.get_dataloader(
@@ -137,17 +149,30 @@ class TestTrainDeepLab:
         self._write_cityscapes_like(test_root, n=2)
 
         original_cls = mod.CityscapesDataset
-        def _patched_cityscapes(root, labels, transforms, shuffle=True, select_range=None, seed=0):
-            return original_cls(root, labels, transforms, shuffle=shuffle, select_range=None, seed=seed)
+
+        def _patched_cityscapes(
+            root, labels, transforms, shuffle=True, select_range=None, seed=0
+        ):
+            return original_cls(
+                root, labels, transforms, shuffle=shuffle, select_range=None, seed=seed
+            )
+
         mocker.patch.object(mod, "CityscapesDataset", side_effect=_patched_cityscapes)
 
         class FakeModel(torch.nn.Module):
-            def train(self, *a, **k): return self
-            def to(self, *a, **k): return self
+            def train(self, *a, **k):
+                return self
+
+            def to(self, *a, **k):
+                return self
+
             def forward(self, x):
                 B, _, H, W = x.shape
                 return {"out": torch.randn(B, len(mod.labels), H, W)}
-        mocker.patch("model_eval.train_deeplab.createDeepLabv3", return_value=FakeModel())
+
+        mocker.patch(
+            "model_eval.train_deeplab.createDeepLabv3", return_value=FakeModel()
+        )
 
         fake_metric = mock.Mock()
         fake_metric.compute.return_value = {
@@ -168,9 +193,10 @@ class TestTrainDeepLab:
                 "mask": self._make_scaled_mask(B, H, W, num_classes=len(mod.labels)),
             }
             return [sample]
+
         mocker.patch("torch.utils.data.DataLoader", side_effect=_dl_factory)
 
-       # 5) Optimizer/scaler/amp as no-ops
+        # 5) Optimizer/scaler/amp as no-ops
         mocker.patch(
             "torch.optim.Adam",
             return_value=mock.Mock(zero_grad=mock.Mock(), step=mock.Mock()),
@@ -178,8 +204,11 @@ class TestTrainDeepLab:
 
         # Return a GradScaler stub whose `scale(loss)` returns an object with `.backward()` no-op
         class _Scaled:
-            def __init__(self, loss): self.loss = loss
-            def backward(self): return None
+            def __init__(self, loss):
+                self.loss = loss
+
+            def backward(self):
+                return None
 
         mocker.patch(
             "model_eval.train_deeplab.GradScaler",
@@ -191,8 +220,12 @@ class TestTrainDeepLab:
         )
 
         class _Ctx:
-            def __enter__(self): return None
-            def __exit__(self, *a): return False
+            def __enter__(self):
+                return None
+
+            def __exit__(self, *a):
+                return False
+
         mocker.patch("model_eval.train_deeplab.autocast", return_value=_Ctx())
         mocker.patch("model_eval.train_deeplab.autocast", return_value=_Ctx())
 
