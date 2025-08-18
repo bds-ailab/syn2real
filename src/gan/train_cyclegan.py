@@ -16,20 +16,20 @@ from diffusers.optimization import get_scheduler
 from peft.utils import get_peft_model_state_dict
 from cleanfid.fid import get_folder_features, build_feature_extractor, frechet_distance
 import vision_aided_loss
-from model import make_1step_sched
-from cyclegan_turbo import (
+from gan.model import make_1step_sched
+from gan.cyclegan_turbo import (
     CycleGAN_Turbo,
     VAE_encode,
     VAE_decode,
     initialize_unet,
     initialize_vae,
 )
-from training_utils import (
+from gan.training_utils import (
     UnpairedDataset,
     build_transform,
     parse_args_unpaired_training,
 )
-from dino_struct import DinoStructureLoss
+from gan.dino_struct import DinoStructureLoss
 import bitsandbytes as bnb
 from PIL import ImageFile
 

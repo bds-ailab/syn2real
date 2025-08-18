@@ -20,8 +20,21 @@ dependencies = [
     "safetensors (>=0.4.3,<0.5.0)",
     "sentencepiece (>=0.2.0,<0.3.0)",
     "accelerate (>=0.32.1,<0.33.0)",
-    "bitsandbytes (>=0.43.1,<0.44.0)"
+    "bitsandbytes (>=0.43.1,<0.44.0)",
+    "torch (>=2.7.1,<2.8.0)",
+    "torchvision (>=0.22.1,<0.23.0)",
 ]
+
+
+[tool.poetry]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "~7.0.1"
+pytest-mock = "~3.14.0"
+pytest-testdox = "~3.1.0"
+pytest-cov = "~5.0.0"
+pytest-sugar = "~1.0.0"
+pytest-clarity = "~1.0.1"
 
 
 [build-system]

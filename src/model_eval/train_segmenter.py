@@ -1,6 +1,6 @@
 from datasets import load_dataset
 import json
-from labels import labels, reduced_labels
+from model_eval.labels import labels, reduced_labels
 from torchvision.transforms import ColorJitter
 from transformers import SegformerImageProcessor
 from transformers import SegformerForSemanticSegmentation

@@ -3,7 +3,7 @@ import requests
 from transformers import BlipProcessor, BlipForConditionalGeneration
 import os
 import torch
-from config import DEVICE, DATA_PATH, FILE_NAME, PROMPT
+from blip_caption.config import DEVICE, DATA_PATH, FILE_NAME, PROMPT
 import json
 
 

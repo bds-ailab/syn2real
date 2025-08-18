@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.models as models
 from torch.cuda.amp import GradScaler, autocast
-from config import DEVICE, LOG_FILE, LR, CRITEREON, OPTIMIZER
+from baseline_model.config import DEVICE, LOG_FILE, LR, CRITEREON, OPTIMIZER
 
 
 def load_resnet50(num_classes, device=DEVICE):
@@ -48,6 +48,7 @@ def train(
     criterion=CRITEREON,
     lr=LR,
     device=DEVICE,
+    log_file=LOG_FILE,
 ):
     """function: train the ResNet model on given dataloader
 

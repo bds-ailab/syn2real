@@ -5,7 +5,7 @@ import os
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
-from config import SR, BATCH_SIZE, NUM_WORKERS
+from baseline_model.config import SR, BATCH_SIZE, NUM_WORKERS
 
 
 class CustomImageDataset(Dataset):

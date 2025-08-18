@@ -2,3 +2,6 @@
 mlflow/change_pass.py
 src/controlnet_sdxl/new_users.txt
 .vscode/settings.json
+*pyc
+*coverage
+*.pkl
