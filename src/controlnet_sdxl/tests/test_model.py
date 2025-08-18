@@ -21,7 +21,6 @@ skip = pytest.mark.skip
 @describe("Test model import and saving functions")
 class TestModelFunctions:
 
-    @skip
     @it("should import the correct model class based on the model name or path")
     @mock.patch("transformers.PretrainedConfig.from_pretrained")
     def test_import_model_class_from_model_name_or_path(self, mock_from_pretrained):
@@ -45,7 +44,6 @@ class TestModelFunctions:
         with pytest.raises(ValueError, match="UnsupportedModel is not supported."):
             import_model_class_from_model_name_or_path("model/path", "main")
 
-    @skip
     @it("should save the model card correctly")
     @mock.patch("diffusers.utils.make_image_grid")
     @mock.patch("diffusers.utils.hub_utils.load_or_create_model_card")
@@ -77,7 +75,7 @@ class TestModelFunctions:
         os.makedirs(repo_folder, exist_ok=True)
 
         # Call the function
-        save_model_card(repo_id, image_logs, base_model, repo_folder)
+        save_model_card(repo_id, image_logs, base_model, repo_folder)  # type: ignore
 
         # Check if the README.md was saved correctly
         assert os.path.exists(os.path.join(repo_folder, "README.md"))

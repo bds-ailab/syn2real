@@ -11,12 +11,12 @@ from gan.cyclegan_turbo import CycleGAN_Turbo  # make sure import is correct
 
 it = pytest.mark.it
 describe = pytest.mark.describe
-skip = pytest.mark.skip
 
 
 @describe("Test the inference script")
 class TestInference:
 
+    @it("Must run the whole inference pipeline")
     @mock.patch("gan.inference.CycleGAN_Turbo")
     @mock.patch("gan.inference.build_transform")
     @mock.patch("PIL.Image.open")

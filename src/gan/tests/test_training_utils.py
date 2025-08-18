@@ -196,7 +196,9 @@ class TestBuildTransform:
 @describe("PairedDataset")
 class TestPairedDataset:
 
-    @it("len and __getitem__ on train split")
+    @it(
+        "Must initialize the paired dataset object for loading and transforming paired data samples from test split."
+    )
     def test_paired_train_split(self, tmp_path, monkeypatch):
         # --- structure ---
         root = tmp_path / "paired"
@@ -239,7 +241,9 @@ class TestPairedDataset:
         # tokenizer output shape
         assert tuple(sample["input_ids"].shape) == (1, tok.model_max_length)
 
-    @it("len and __getitem__ on test split")
+    @it(
+        "Must initialize the paired dataset object for loading and transforming paired data samples from test split."
+    )
     def test_paired_test_split(self, tmp_path):
         root = tmp_path / "paired2"
         (root / "test_A").mkdir(parents=True, exist_ok=True)
@@ -276,7 +280,7 @@ class TestPairedDataset:
 @describe("UnpairedDataset")
 class TestUnpairedDataset:
 
-    @it("__len__ aggregates counts from src/tgt folders")
+    @it("Must load unpaired data samples from two distinct domains")
     def test_unpaired_len(self, tmp_path):
         root = tmp_path / "unpaired"
         (root / "train_A").mkdir(parents=True, exist_ok=True)
@@ -302,7 +306,9 @@ class TestUnpairedDataset:
         # len = len(src)+len(tgt)
         assert len(ds) == 5
 
-    @it("__getitem__ returns normalized tensors and tokenized fixed captions")
+    @it(
+        "Must load unpaired data samples from two distinct domains, with a specific size"
+    )
     def test_unpaired_getitem(self, tmp_path, monkeypatch):
         root = tmp_path / "unpaired2"
         (root / "train_A").mkdir(parents=True, exist_ok=True)

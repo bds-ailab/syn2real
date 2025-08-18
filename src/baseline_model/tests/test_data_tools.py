@@ -57,7 +57,7 @@ class TestDataTools:
         assert isinstance(image, Image.Image)
         assert label == 0
 
-    @it("Must create a DataLoader with the correct batch size and transformations")
+    @it("Must Load and prepare synthetic data for ResNet50 header format")
     @mock.patch("torch.utils.data.DataLoader")
     def test_preprocess_resnet50(self, mock_dataloader):
         mock_dataloader.return_value = DataLoader([])

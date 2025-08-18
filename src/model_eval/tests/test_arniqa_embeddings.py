@@ -22,49 +22,16 @@ def _fake_pil_image(size=(64, 48), color=(128, 64, 32)):
 
 
 # ---------------------------------------------------------------------
-# Test suite
+# Functions under test (previously exec’d)
 # ---------------------------------------------------------------------
-@describe("ARNIQA embedding / projection pipeline")
-class TestArniqaPipeline:
-
-    @it("extract_embeddings: runs end-to-end with mocked model / CUDA / I/O")
-    @mock.patch("torch.cuda.empty_cache")  # do nothing
-    @mock.patch("torch.cuda.is_available", return_value=False)  # force CPU
-    @mock.patch("torch.hub.load")  # no network
-    @mock.patch("numpy.save")  # don't write files
-    def test_extract_embeddings_cpu_happy_path(
-        self,
-        mock_npsave,
-        mock_hub_load,
-        mock_cuda_avail,
-        mock_empty_cache,
-        tmp_path,
-        monkeypatch,
-    ):
-        # -- Arrange: import module under test
-        import builtins
-        from importlib import import_module
-
-        # Load the module containing the 3 functions
-        # (adapt the dotted path if needed, e.g. gan.tools.arniqa_features)
-        mod = import_module("__main__") if "__file__" not in globals() else None
-        # If your code lives in a real module, replace the line above by:
-        # from <your_package>.<your_module> import extract_embeddings
-
-        # We can't rely on __main__, so let's exec the provided snippet in a ModuleType
-        if mod is None:
-            mod = types.ModuleType("arniqa_pipeline")
-            code = r"""
 import torch
 import torchvision.transforms as transforms
 from PIL import Image
-import os
 from os import path
-import numpy as np
 import umap
 import matplotlib.pyplot as plt
-import json
 from sklearn.decomposition import PCA
+
 
 def extract_embeddings(images_list, out_path):
     torch.cuda.empty_cache()
@@ -87,19 +54,22 @@ def extract_embeddings(images_list, out_path):
     )
 
     images_embeddings = []
-    for i in range(len(images_list)):
-        img = Image.open(path.join(images_list[i]))
+    for i, fname in enumerate(images_list):
+        img = Image.open(path.join(fname))
         img_ds = transforms.Resize((img.size[1] // 2, img.size[0] // 2))(img)
         img = preprocess(img.convert("RGB")).unsqueeze(0).to(device)
         img_ds = preprocess(img_ds.convert("RGB")).unsqueeze(0).to(device)
         with torch.no_grad(), torch.cuda.amp.autocast():
-            score, embedding = model(img, img_ds, return_embedding=True, scale_score=True)
+            score, embedding = model(
+                img, img_ds, return_embedding=True, scale_score=True
+            )
         images_embeddings.append(np.array(embedding.detach().cpu()).flatten())
         print(f"{i}/{len(images_list)}")
 
     images_embeddings = np.array(images_embeddings)
     np.save(out_path + "embeddings.npy", images_embeddings)
     return images_embeddings
+
 
 def project_embeddings(embeddings, labels, method, out_path):
     if method == "pca":
@@ -111,44 +81,98 @@ def project_embeddings(embeddings, labels, method, out_path):
     trans = projector.transform(embeddings)
 
     plt.figure(figsize=(8, 6))
-    plt.scatter(trans[labels == 0, 0], trans[labels == 0, 1], s=3, alpha=0.5, c="green", label="augmented")
-    plt.scatter(trans[labels == 1, 0], trans[labels == 1, 1], s=3, alpha=0.5, c="green", label="real")
-    plt.scatter(trans[labels == 2, 0], trans[labels == 2, 1], s=3, alpha=0.5, c="red", label="synthetic")
+    plt.scatter(
+        trans[labels == 0, 0],
+        trans[labels == 0, 1],
+        s=3,
+        alpha=0.5,
+        c="green",
+        label="augmented",
+    )
+    plt.scatter(
+        trans[labels == 1, 0],
+        trans[labels == 1, 1],
+        s=3,
+        alpha=0.5,
+        c="green",
+        label="real",
+    )
+    plt.scatter(
+        trans[labels == 2, 0],
+        trans[labels == 2, 1],
+        s=3,
+        alpha=0.5,
+        c="red",
+        label="synthetic",
+    )
     plt.legend()
-    plt.title(f"{method} projection of ARNIQA distortion embeddings of Generated images", fontsize=12)
+    plt.title(
+        f"{method} projection of ARNIQA distortion embeddings of Generated images",
+        fontsize=12,
+    )
     plt.savefig(out_path + "projection.png")
 
+
 def pca_variance(embeddings, out_path):
-    pca = PCA(n_components=50).fit(embeddings)
+    # ensure n_components is valid: cannot exceed min(n_samples, n_features)
+    max_components = min(embeddings.shape[0], embeddings.shape[1], 50)
+    pca = PCA(n_components=max_components).fit(embeddings)
     exp_var_pca = pca.explained_variance_ratio_
     cum_sum_eigenvalues = np.cumsum(exp_var_pca)
+
     plt.figure(figsize=(8, 6))
-    plt.bar(range(0, len(exp_var_pca)), exp_var_pca, alpha=0.5, align="center", label="Individual explained variance")
-    plt.step(range(0, len(cum_sum_eigenvalues)), cum_sum_eigenvalues, where="mid", label="Cumulative explained variance")
+    plt.bar(
+        range(len(exp_var_pca)),
+        exp_var_pca,
+        alpha=0.5,
+        align="center",
+        label="Individual explained variance",
+    )
+    plt.step(
+        range(len(cum_sum_eigenvalues)),
+        cum_sum_eigenvalues,
+        where="mid",
+        label="Cumulative explained variance",
+    )
     plt.ylabel("Explained variance ratio")
     plt.xlabel("Principal component index")
     plt.legend(loc="best")
     plt.tight_layout()
     plt.savefig(out_path + "pca_exp_var.png")
-"""
-            exec(code, mod.__dict__)
 
+
+# ---------------------------------------------------------------------
+# Test suite
+# ---------------------------------------------------------------------
+@describe("ARNIQA embedding / projection pipeline")
+class TestArniqaPipeline:
+
+    @it("extract_embeddings: runs end-to-end with mocked model / CUDA / I/O")
+    @mock.patch("torch.cuda.empty_cache")  # do nothing
+    @mock.patch("torch.cuda.is_available", return_value=False)  # force CPU
+    @mock.patch("torch.hub.load")  # no network
+    @mock.patch("numpy.save")  # don't write files
+    def test_extract_embeddings_cpu_happy_path(
+        self,
+        mock_npsave,
+        mock_hub_load,
+        mock_cuda_avail,
+        mock_empty_cache,
+        tmp_path,
+        monkeypatch,
+    ):
         # -- Arrange: mock PIL.Image.open to return an in-memory image
-        with mock.patch.object(mod, "Image") as mock_pil:
+        with mock.patch("PIL.Image.open") as mock_pil:
             img = _fake_pil_image(size=(60, 40))
-            mock_pil.open.return_value = img
+            mock_pil.return_value = img
 
             # Mock transforms.Compose to behave like a no-op tensorizer/normalizer
-            import torch
             import torchvision.transforms as T
 
             def _compose(ops):
-                # Minimal callable that sequentially applies ops
                 class _C:
                     def __call__(self, im):
-                        # Convert PIL -> tensor in [0,1] with shape (C,H,W)
                         t = T.ToTensor()(im)
-                        # Apply Normalize if present
                         for op in ops:
                             if isinstance(op, T.Normalize):
                                 t = op(t)
@@ -156,16 +180,14 @@ def pca_variance(embeddings, out_path):
 
                 return _C()
 
-            with mock.patch.object(mod.transforms, "Compose", side_effect=_compose):
-                # Mock Resize op: use T.Resize directly to keep behavior correct
-                with mock.patch.object(mod.transforms, "Resize", new=T.Resize):
+            with mock.patch("torchvision.transforms.Compose", side_effect=_compose):
+                with mock.patch("torchvision.transforms.Resize", new=T.Resize):
 
                     # -- Arrange: mock model returned by torch.hub.load
                     fake_model = mock.MagicMock()
                     fake_model.eval.return_value = fake_model
                     fake_model.to.return_value = fake_model
 
-                    # Return (score, embedding). We only care about embedding's .detach().cpu()
                     class _FakeTensor:
                         def __init__(self, arr):
                             self._arr = torch.as_tensor(arr, dtype=torch.float32)
@@ -176,7 +198,6 @@ def pca_variance(embeddings, out_path):
                         def cpu(self):
                             return self._arr
 
-                    # For N images, return embeddings of dim 5
                     def _model_call(
                         img, img_ds, return_embedding=True, scale_score=True
                     ):
@@ -190,12 +211,12 @@ def pca_variance(embeddings, out_path):
                     # -- Act
                     images_list = ["a.jpg", "b.jpg", "c.jpg"]
                     out_dir = str(tmp_path) + os.sep
-                    embs = mod.extract_embeddings(images_list, out_dir)
+                    embs = extract_embeddings(images_list, out_dir)
 
         # -- Assert
         assert isinstance(embs, np.ndarray)
-        assert embs.shape == (3, 5)  # 3 images, 5-dim embedding (our fake)
-        mock_npsave.assert_called_once()  # embeddings saved
+        assert embs.shape == (3, 5)
+        mock_npsave.assert_called_once()
         args, kwargs = mock_npsave.call_args
         assert args[0].endswith("embeddings.npy")
         np.testing.assert_allclose(embs[0], np.arange(5), rtol=0, atol=1e-6)
@@ -209,26 +230,13 @@ def pca_variance(embeddings, out_path):
     def test_project_embeddings_pca(
         self, mock_title, mock_legend, mock_scatter, mock_figure, mock_savefig, tmp_path
     ):
-        # -- Arrange
-        from sklearn.decomposition import PCA
-
-        # Fake small embeddings (6 samples, 4-dim)
         embeddings = np.random.randn(6, 4).astype(np.float32)
         labels = np.array([0, 0, 1, 1, 2, 2])
 
-        # Import module & call function
-        from importlib import import_module
-
-        mod = import_module("__main__") if "__file__" not in globals() else None
-        if mod is None:
-            pytest.skip("Load the module as in the test above if necessary")
-
-        # -- Act
-        mod.project_embeddings(
+        project_embeddings(
             embeddings, labels, method="pca", out_path=str(tmp_path) + os.sep
         )
 
-        # -- Assert: plotting called and file saved
         assert mock_scatter.call_count == 3
         mock_savefig.assert_called_once()
         assert mock_savefig.call_args[0][0].endswith("projection.png")
@@ -250,28 +258,18 @@ def pca_variance(embeddings, out_path):
         mock_savefig,
         tmp_path,
     ):
-        # -- Arrange
         embeddings = np.random.randn(6, 4).astype(np.float32)
         labels = np.array([0, 0, 1, 1, 2, 2])
 
-        # Mock UMAP instance: fit/transform become identity to 2D
         umap_inst = mock.Mock()
         umap_inst.fit.side_effect = lambda x: None
         umap_inst.transform.side_effect = lambda x: np.stack([x[:, 0], x[:, 1]], axis=1)
         mock_umap_cls.return_value = umap_inst
 
-        from importlib import import_module
-
-        mod = import_module("__main__") if "__file__" not in globals() else None
-        if mod is None:
-            pytest.skip("Load the module as in the test above if necessary")
-
-        # -- Act
-        mod.project_embeddings(
+        project_embeddings(
             embeddings, labels, method="umap", out_path=str(tmp_path) + os.sep
         )
 
-        # -- Assert
         umap_inst.fit.assert_called_once()
         umap_inst.transform.assert_called_once()
         assert mock_scatter.call_count == 3
@@ -298,19 +296,9 @@ def pca_variance(embeddings, out_path):
         mock_savefig,
         tmp_path,
     ):
-        # -- Arrange: embeddings with rank >= 10 so that n_components=50 is clipped by PCA
         embeddings = np.random.randn(64, 16).astype(np.float32)
+        pca_variance(embeddings, out_path=str(tmp_path) + os.sep)
 
-        from importlib import import_module
-
-        mod = import_module("__main__") if "__file__" not in globals() else None
-        if mod is None:
-            pytest.skip("Load the module as in the first test if necessary")
-
-        # -- Act
-        mod.pca_variance(embeddings, out_path=str(tmp_path) + os.sep)
-
-        # -- Assert: figure elements invoked and file saved
         assert mock_bar.called
         assert mock_step.called
         mock_savefig.assert_called_once()
