@@ -1,0 +1,111 @@
+name: create-or-update-comment
+description: 'Create or update a comment in a PR or an issue.'
+
+inputs:
+  body:
+    required: false
+    default: ''
+    description: 'Body of your comment.'
+
+  body-path:
+    required: false
+    default: ''
+    description: "Path to the comment's body."
+
+  force-recreate:
+    required: false
+    default: 'false'
+    description: 'Force the creation of a new comment if a previous comment has already been created.'
+
+  order:
+    required: false
+    default: 'first'
+    description: 'Option to choose which comment you want to update. It can be either "first" or "last".'
+
+  search-string:
+    required: false
+    default: ''
+    description: 'The string used to find the previous comment if it exists.'
+
+runs:
+  using: composite
+  steps:
+    - name: Search for previous comment
+      id: find-comment
+      if: ${{ inputs.force-recreate != 'true' }}
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const opts = github.rest.issues.listComments.endpoint.merge({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+
+          // Paginate is used to retrieve the comments of every pages.
+          // See https://octokit.github.io/rest.js/v21/#pagination.
+          var comments = await github.paginate(opts)
+
+          // Reverse comments array if wanted
+          // (listComments returns the comments ordered by ascending ID).
+          if ('${{ inputs.order }}' === 'last') {
+            comments.reverse()
+          }
+
+          // Iterate over the comments array.
+          for (const comment of comments) {
+            if (comment.user.login !== 'github-actions[bot]') {
+              continue
+            }
+
+            if (comment.body.includes('${{ inputs.search-string }}')) {
+              core.setOutput('comment-id', comment.id.toString())
+              break
+            }
+          }
+
+    - name: Get body
+      id: get-body
+      env:
+        BODY: ${{ inputs.body }}
+      uses: actions/github-script@v7
+      with:
+        script: |
+          if (process.env.BODY) {
+            core.exportVariable('COMMENT_BODY', process.env.BODY)
+          } else if (`${{ inputs.body-path }}`) {
+            var fs = require('fs')
+            fs.readFile('${{ inputs.body-path }}', 'utf8', function (err, data) {
+              if (err) {
+                core.setFailed(`Action failed with error ${err}`);
+                return
+              }
+              core.exportVariable('COMMENT_BODY', data)
+            });
+          } else {
+            core.exportVariable('COMMENT_BODY', '')
+          }
+
+    - name: Create a new comment
+      if: ${{ inputs.force-recreate == 'true' || steps.find-comment.outputs.comment-id == '' }}
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: process.env.COMMENT_BODY
+          })
+
+    - name: Update existing comment
+      if: ${{ inputs.force-recreate != 'true' && steps.find-comment.outputs.comment-id != '' }}
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.updateComment({
+            comment_id: ${{ steps.find-comment.outputs.comment-id }},
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: process.env.COMMENT_BODY
+          })

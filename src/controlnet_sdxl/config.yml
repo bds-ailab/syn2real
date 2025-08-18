@@ -1,0 +1,39 @@
+nb_rounds: 2
+
+round0: 
+  base_model_path: "stabilityai/stable-diffusion-xl-base-1.0" 
+  unet_path: Null 
+  controlnet_path: Null
+  output_dir: "/out/active_learning_test_round0_controlnet/"
+  lr: 4e-5
+  bs: 2
+  max_steps: 20000
+  acc_steps: 10
+  base_model_dir2: "stabilityai/stable-diffusion-xl-base-1.0"
+  unet_dir2: Null
+  controlnet_dir2: "/out/active_learning_test_round0_controlnet/"
+  output_dir2: "/out/active_learning_test_round0_unet/"
+  lr2: 4e-5
+  bs2: 1
+  max_steps2: 5000
+  acc_steps2: 20
+
+round1: 
+  in_json: "/data/cityscape/syn_city/images03/data_captionned.json"
+  out_json: "/data/cityscapes/train.jsonl"
+  unet_path: "/out/active_learning_test_round0_unet/unet/"
+  controlnet_path: "/out/active_learning_test_round0_unet/controlnet/"
+  base_model_path: "stabilityai/stable-diffusion-xl-base-1.0" 
+  output_dir: "/out/active_learning_test_round1_controlnet/"
+  lr: 4e-5
+  bs: 2
+  max_steps: 20000
+  acc_steps: 10
+  base_model_dir2: "stabilityai/stable-diffusion-xl-base-1.0"
+  unet_dir2: "/out/active_learning_test_round0_unet/unet"
+  controlnet_dir2: "/out/active_learning_test_round1_controlnet/"
+  output_dir2: "/out/active_learning_test_round1_unet/"
+  lr2: 4e-5
+  bs2: 1
+  max_steps2: 5000
+  acc_steps2: 20

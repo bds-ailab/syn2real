@@ -1,0 +1,15 @@
+{
+    "dockerComposeFile": "../docker-compose.yaml",
+    "service": "template-container",
+    // Container user VS Code should use when connecting
+    "remoteUser": "username",
+    // Set *default* container specific settings.json values on container create.
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash"
+            }
+        }
+    },
+    "workspaceFolder": "/"
+}

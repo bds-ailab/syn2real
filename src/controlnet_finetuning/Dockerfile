@@ -1,0 +1,47 @@
+FROM pytorch/pytorch:2.3.0-cuda11.8-cudnn8-runtime
+
+ARG USER_NAME
+ARG USER_ID
+ARG GROUP_NAME
+ARG GROUP_ID
+
+
+# ENV DEBIAN_FRONTEND=noninteractive
+
+# hadolint ignore=DL3008
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --fix-missing \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    git \
+    curl \
+    unzip \
+    sudo \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# hadolint ignore=DL3046
+RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" \
+    && echo "%${GROUP_NAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
+    && useradd -m -u "${USER_ID}" -l "${USER_NAME}" -G "${GROUP_NAME}"
+
+USER "${USER_NAME}":"${GROUP_NAME}"
+
+# Copy working dir to clone the git repo inside
+COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./ControlNet /ControlNet
+
+# Cloning ControlNet repository
+RUN curl -L https://github.com/lllyasviel/ControlNet/archive/refs/heads/main.zip -o /ControlNet/controlnet.zip \
+    && unzip -q /ControlNet/controlnet.zip -d /ControlNet/ \
+    && mv /ControlNet/ControlNet-main /ControlNet/ControlNet \
+    && rm /ControlNet/controlnet.zip
+
+# Install python packages
+COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./pyproject_controlnet.toml /pyproject_controlnet.toml
+# hadolint ignore=DL3013,SC1091
+RUN python3 -m venv .venv && \
+    . .venv/bin/activate && \
+    pip install --no-cache-dir poetry && \
+    poetry install
+
+# COPY --chown="${USER_NAME}":"${GROUP_NAME}" entrypoint.sh /entrypoint.sh

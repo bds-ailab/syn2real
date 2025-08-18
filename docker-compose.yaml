@@ -1,0 +1,250 @@
+services:
+  baseline_model:
+    image: ${IMAGE_NAME_BASELINE:-syn2real/baseline}:${IMAGE_TAG:-dev}
+    build:
+      context: ./src/baseline_model
+      shm_size: ${LOW_SHM:-2gb}
+      args:
+        REPO_URL: ${REPO_URL}
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
+    shm_size: ${LOW_SHM:-2gb}
+    stdin_open: true
+    tty: true
+    environment:
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
+    volumes:
+      - data:/data
+      - src_path_baseline:/baseline_model
+      - models:/models
+      - output:/out
+
+  controlnet_finetuning:
+    image: ${IMAGE_NAME_CONTROLNET:-syn2real/controlnet}:${IMAGE_TAG:-dev}
+    build:
+      context: ./src/controlnet_finetuning
+      shm_size: ${HIGH_SHM:-10gb}
+      args:
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
+    shm_size: ${HIGH_SHM:-10gb}
+    stdin_open: true
+    tty: true
+    environment:
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
+    volumes:
+      - data:/data
+      - src_path_controlnet:/controlnet_finetuning
+      - models:/models
+      - output:/out
+
+  blip_caption:
+    image: ${IMAGE_NAME_BLIP:-syn2real/blip}:${IMAGE_TAG:-dev}
+    build:
+      context: ./src/blip_caption
+      shm_size: ${LOW_SHM:-2gb}
+      args:
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
+    shm_size: ${LOW_SHM:-2gb}
+    stdin_open: true
+    tty: true
+    environment:
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
+    volumes:
+      - data:/data
+      - src_path_blip:/blip_caption
+      - models:/models
+      - output:/out
+
+  mlflow:
+    image: ${IMAGE_NAME_MLFLOW:-syn2real/mlflow}:${IMAGE_TAG:-dev}
+    build:
+      context: ./mlflow
+      shm_size: ${LOW_SHM:-2gb}
+      args:
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
+    shm_size: ${LOW_SHM:-2gb}
+    stdin_open: true
+    tty: true
+    environment:
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
+    volumes:
+      - data:/data
+      - src_path_mlflow:/mlflow
+      - models:/models
+      - output:/out
+
+  deepfloyd:
+    image: ${IMAGE_NAME_DEEPF:-syn2real/deepfloyd}:${IMAGE_TAG:-dev}
+    build:
+      context: ./src/deepfloyd_scaler
+      shm_size: ${HIGH_SHM:-10gb}
+      args:
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
+    shm_size: ${HIGH_SHM:-10gb}
+    stdin_open: true
+    tty: true
+    environment:
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
+    volumes:
+      - data:/data
+      - src_path_deepf:/deepf
+      - models:/models
+      - output:/out
+
+  sdxl:
+    image: ${IMAGE_NAME_SDXL:-syn2real/sdxl}:${IMAGE_TAG:-dev}
+    build:
+      context: ./src/controlnet_sdxl
+      shm_size: ${HIGH_SHM:-10gb}
+      args:
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
+    shm_size: ${HIGH_SHM:-10gb}
+    stdin_open: true
+    tty: true
+    environment:
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
+    volumes:
+      - data:/data
+      - src_path_sdxl:/sdxl
+      - models:/models
+      - output:/out
+
+  model_eval:
+    image: ${IMAGE_NAME_EVAL:-syn2real/eval}:${IMAGE_TAG:-dev}
+    build:
+      context: ./src/model_eval
+      shm_size: 20gb
+      args:
+        USER_ID: ${USER_ID:-20025}
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
+    shm_size: 20gb
+    stdin_open: true
+    tty: true
+    environment:
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
+    volumes:
+      - data:/data
+      - src_path_eval:/model_eval
+      - models:/models
+      - output:/out
+
+  gan:
+    image: ${IMAGE_NAME_GAN:-syn2real/gan}:${IMAGE_TAG:-dev}
+    build:
+      context: ./src/gan
+      shm_size: ${HIGH_SHM:-10gb}
+      args:
+        USER_NAME: ${USER_NAME:-syn2realuser}
+        USER_ID: ${USER_ID:-20025}
+        GROUP_NAME: ${GROUP_NAME:-syn2real}
+        GROUP_ID: ${GROUP_ID:-2025}
+    shm_size: ${HIGH_SHM:-10gb}
+    stdin_open: true
+    tty: true
+    environment:
+      GROUP_ID: ${GROUP_ID:-2025}
+      GROUP_NAME: ${GROUP_NAME:-syn2real}
+      USER_ID: ${USER_ID:-20025}
+      USER_NAME: ${USER_NAME:-syn2realuser}
+    volumes:
+      - data:/data
+      - src_path_gan:/gan
+      - models:/models
+      - output:/out
+
+volumes:
+  data:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}
+  src_path_baseline:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:-./src}/baseline_model
+  src_path_controlnet:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:-./src}/controlnet_finetuning
+  src_path_blip:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:-./src}/blip_caption
+  src_path_mlflow:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:-./src}/../mlflow
+  src_path_deepf:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:-./src}/deepfloyd_scaler
+  src_path_sdxl:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:-./src}/controlnet_sdxl
+  src_path_eval:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:-./src}/model_eval
+  src_path_gan:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${SRC_PATH:-./src}/gan
+  models:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${MODEL_PATH:-./model}
+  output:
+    driver_opts:
+      type: none
+      o: bind
+      device: ${OUT_PATH:-./out}

@@ -1,0 +1,43 @@
+FROM pytorch/pytorch:2.3.0-cuda11.8-cudnn8-runtime
+
+ARG USER_NAME
+ARG USER_ID
+ARG GROUP_NAME
+ARG GROUP_ID
+
+# ENV DEBIAN_FRONTEND=noninteractive
+
+# hadolint ignore=DL3008
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --fix-missing \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    git \
+    curl \
+    unzip \
+    sudo \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add user to image
+RUN groupadd -g "${GROUP_ID}" "${GROUP_NAME}" && \
+    useradd -m -u "${USER_ID}" -l "${USER_NAME}" -G "${GROUP_NAME}"
+
+# Copy working dir to clone the git repo inside
+COPY ./diffusers/* /diffusers/
+COPY ./pyproject_model_eval.toml /pyproject_model_eval.toml
+RUN rm /diffusers/README.md
+
+# Install python packages
+# hadolint ignore=DL3013,SC1091
+RUN pip --no-cache-dir install --upgrade pip\
+    && git clone https://github.com/huggingface/diffusers /diffusers/\
+    && pip install --no-cache-dir -e /diffusers/.\
+    && pip install --no-cache-dir -r /diffusers/examples/controlnet/requirements_sdxl.txt\
+    && pip install --no-cache-dir -r /pyproject_model_eval.toml
+
+# Copy source code
+USER "${USER_NAME}":"${GROUP_NAME}"
+COPY --chown="${USER_NAME}":"${GROUP_NAME}" ./* /sdxl/
+
+ENTRYPOINT ["bash"]

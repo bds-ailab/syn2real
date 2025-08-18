@@ -1,0 +1,33 @@
+[project]
+name = "mlflow-container"
+version = "0.1.0"
+description = "MLFlow image to log experiments on MLFlow"
+authors = [
+    {name = "Anaïs Druart",email = "anais.druart@atos.net"}
+]
+readme = "README.md"
+requires-python = "^3.9"
+dependencies = [
+    "numpy (>=1.26.4,<1.27.0)",
+    "pillow (>=10.3.0,<10.4.0)",
+    "matplotlib (>=3.8.4,<4.0.0)",
+    "pandas (>=2.2.2,<2.3.0)",
+    "mlflow (>=2.14.2,<2.15.0)",
+    "pyyaml (>=6.0.1,<6.1.0)",
+    "setuptools (>=80.9.0,<80.10.0)",
+]
+
+
+[tool.poetry]
+
+[tool.poetry.group.dev.dependencies]
+pytest = "~7.0.1"
+pytest-mock = "~3.14.0"
+pytest-testdox = "~3.1.0"
+pytest-cov = "~5.0.0"
+pytest-sugar = "~1.0.0"
+pytest-clarity = "~1.0.1"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

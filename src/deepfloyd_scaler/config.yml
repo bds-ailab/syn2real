@@ -1,0 +1,5 @@
+data_path: "/data/cityscape/data_val_captionned.json"
+start_idx: 40 
+end_idx: 100 
+images_path: "/out/validation_out_canny_lowres/"
+output_path: "/out/upscaling/"

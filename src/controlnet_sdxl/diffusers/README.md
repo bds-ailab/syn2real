@@ -1,0 +1,1 @@
+This folder is added to pull diffusers library from its git repository
